@@ -223,6 +223,7 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
     <button class="btn btn-ghost" onclick="selectAll()">Alles selecteren</button>
     <button class="btn btn-ghost" onclick="deselectAll()">Deselecteren</button>
     <button class="btn btn-danger" onclick="deleteSelected()">🗑️ Verwijder selectie</button>
+    <button class="btn btn-ghost" onclick="clearAllProspects()" style="color:var(--red);">🗑️ Alles wissen</button>
   </div>
 
   <!-- ACTION BAR -->
@@ -496,12 +497,31 @@ Dirk`,
 let TEMPLATES = JSON.parse(localStorage.getItem('tnl_templates') || 'null') || JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
 
 // ===== STATE =====
-let allProspects = [];
+let allProspects = JSON.parse(localStorage.getItem('tnl_prospects') || '[]');
 let filtered = [];
 let selectedIndices = new Set();
 let mailProspects = [];
 let mailIdx = 0;
 let currentSettingsCat = "KoudContact";
+
+function clearAllProspects() {
+  if (!confirm('Alle prospects wissen? Dit kan niet ongedaan gemaakt worden.')) return;
+  allProspects = [];
+  selectedIndices.clear();
+  saveProspects();
+  renderStats();
+  renderTable();
+  document.getElementById('statsBar').style.display = 'none';
+  document.getElementById('toolbar').style.display = 'none';
+  document.getElementById('tableWrap').style.display = 'none';
+  document.getElementById('uploadZone').classList.remove('compact');
+  document.getElementById('uploadZoneTitle').textContent = 'Laad uw prospectlijst in';
+  document.getElementById('uploadZoneDesc').textContent = 'Sleep een Excel-bestand hierheen, of gebruik één van de knoppen hieronder';
+}
+
+function saveProspects() {
+  try { localStorage.setItem('tnl_prospects', JSON.stringify(allProspects)); } catch(e) {}
+}
 
 // ===== TAB SWITCHING =====
 function switchTab(name) {
@@ -704,6 +724,7 @@ function processProspectRows(rows, source) {
 
   allProspects = [...allProspects, ...newProspects];
   selectedIndices.clear();
+  saveProspects();
 
   // Show results
   if (duplicates.length > 0) showAlert('Dup', `⚠️ <strong>${duplicates.length} dubbel(s) overgeslagen:</strong><br>${duplicates.map(d => '• ' + d).join('<br>')}${newProspects.length > 0 ? '<br><br>✅ <strong>' + newProspects.length + ' nieuwe prospects toegevoegd. Totaal: ' + allProspects.length + '</strong>' : ''}`);
@@ -792,18 +813,18 @@ function deleteProspect(rowNum, e) {
   e.stopPropagation();
   allProspects = allProspects.filter(p => p.rowNum !== rowNum);
   selectedIndices.delete(rowNum);
-  renderStats(); renderTable();
+  saveProspects(); renderStats(); renderTable();
 }
 function deleteSelected() {
   if (!selectedIndices.size) return;
   if (!confirm(`${selectedIndices.size} prospect(s) definitief verwijderen?`)) return;
   allProspects = allProspects.filter(p => !selectedIndices.has(p.rowNum));
   selectedIndices.clear();
-  renderStats(); renderTable();
+  saveProspects(); renderStats(); renderTable();
 }
 function markVerstuurd() {
   selectedIndices.forEach(rn => { const p = allProspects.find(x => x.rowNum===rn); if(p) p.status='Verstuurd'; });
-  deselectAll(); renderStats();
+  saveProspects(); deselectAll(); renderStats();
 }
 
 // ===== TAB 2: MAILS =====
@@ -877,6 +898,7 @@ function saveOutlookConcept() {
   a.href = `mailto:${p.email}?subject=${subj}&body=${body}`;
   a.click();
   p.status = 'Verstuurd';
+  saveProspects();
   const tip = document.getElementById('outlookTip');
   tip.style.cssText = 'display:block;background:#e8f4fd;border-left:3px solid var(--blue);color:#1a4a7a;border-radius:6px;padding:10px 14px;margin-top:10px;font-size:13px;';
   tip.innerHTML = '📬 Outlook geopend. Druk <strong>Ctrl+S</strong> in Outlook om op te slaan als concept.';
@@ -944,6 +966,19 @@ function resetTemplate() {
 
 // Load initial settings view
 switchSettingsTab('KoudContact', document.querySelector('.settings-nav-item'));
+
+// Restore prospects from localStorage on startup
+if (allProspects.length > 0) {
+  renderStats();
+  renderTable();
+  document.getElementById('statsBar').style.display = 'flex';
+  document.getElementById('toolbar').style.display = 'flex';
+  document.getElementById('tableWrap').style.display = 'block';
+  document.getElementById('uploadZoneTitle').textContent = 'Nog een bestand toevoegen';
+  document.getElementById('uploadZoneDesc').textContent = 'Excel, screenshot of plakken — dubbele e-mails worden overgeslagen.';
+  document.getElementById('uploadZone').classList.add('compact');
+  showAlert('Ok', '✅ <strong>' + allProspects.length + ' prospects</strong> hersteld vanuit vorige sessie.', 3000);
+}
 
 // API KEY
 function showApiKeyModal() {
