@@ -624,6 +624,12 @@ async function readImageFile(file) {
       })
     });
     const data = await response.json();
+    if (!response.ok || data.error) {
+      throw new Error(data.error ? data.error.message : 'API fout: ' + response.status);
+    }
+    if (!data.content || !Array.isArray(data.content)) {
+      throw new Error('Onverwacht API-antwoord: ' + JSON.stringify(data).slice(0,200));
+    }
     const text = data.content.map(b => b.text || '').join('');
     let rows;
     try { rows = JSON.parse(text.replace(/```json|```/g, '').trim()); }
