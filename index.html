@@ -161,6 +161,7 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
     <h1>Prospectie App</h1>
     <p>The Next Level — Metroplan Quick Scan uitnodigingen</p>
   </div>
+  <button onclick="showApiKeyModal()" style="margin-left:auto;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;" title="API-sleutel instellen">🔑 API-sleutel</button>
 </header>
 
 <div class="tab-bar">
@@ -341,6 +342,23 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
     </div>
   </div>
 </div>
+</div>
+
+<!-- API KEY MODAL -->
+<div id="apiKeyOverlay" style="display:none;position:fixed;inset:0;background:rgba(10,20,50,0.7);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:32px;max-width:480px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <h2 style="color:#1B3A6B;font-size:18px;margin-bottom:8px;">🔑 API-sleutel vereist</h2>
+    <p style="color:#6b7a99;font-size:13px;margin-bottom:20px;">Om screenshots uit te lezen heeft de app uw Anthropic API-sleutel nodig. De sleutel wordt lokaal opgeslagen in uw browser en nooit gedeeld.</p>
+    <div style="margin-bottom:16px;">
+      <label style="display:block;font-size:11px;font-weight:700;color:#6b7a99;text-transform:uppercase;margin-bottom:6px;">Anthropic API-sleutel</label>
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." style="width:100%;border:1.5px solid #D0DCF0;border-radius:8px;padding:10px 14px;font-size:13px;outline:none;font-family:monospace;">
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="saveApiKey()" style="flex:1;background:#E8812A;color:white;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;">Opslaan &amp; doorgaan</button>
+      <button onclick="document.getElementById('apiKeyOverlay').style.display='none'" style="background:white;color:#1B3A6B;border:1.5px solid #D0DCF0;border-radius:8px;padding:11px 16px;font-size:14px;cursor:pointer;">Annuleer</button>
+    </div>
+    <p style="font-size:11px;color:#6b7a99;margin-top:12px;">Uw sleutel vindt u op <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:#4A7CB5;">console.anthropic.com</a></p>
+  </div>
 </div>
 
 <script>
@@ -586,11 +604,13 @@ async function readImageFile(file) {
   showAlert('Info', '🤖 AI leest de afbeelding uit... even geduld.');
   try {
     const base64 = await fileToBase64(file);
+    const apiKey = localStorage.getItem('tnl_api_key');
+    if (!apiKey) { showApiKeyModal(); return; }
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': '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',
+        'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
         'anthropic-dangerous-direct-browser-access': 'true'
       },
@@ -918,6 +938,20 @@ function resetTemplate() {
 
 // Load initial settings view
 switchSettingsTab('KoudContact', document.querySelector('.settings-nav-item'));
+
+// API KEY
+function showApiKeyModal() {
+  const overlay = document.getElementById('apiKeyOverlay');
+  overlay.style.display = 'flex';
+  setTimeout(() => document.getElementById('apiKeyInput').focus(), 100);
+}
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-ant-')) { alert('Ongeldige sleutel — moet beginnen met sk-ant-'); return; }
+  localStorage.setItem('tnl_api_key', key);
+  document.getElementById('apiKeyOverlay').style.display = 'none';
+  showAlert('Ok', '✅ API-sleutel opgeslagen. Probeer de screenshot opnieuw.', 3000);
+}
 
 // FILTERS
 document.getElementById('searchBox').addEventListener('input', renderTable);
