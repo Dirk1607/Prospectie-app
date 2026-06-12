@@ -357,7 +357,7 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
 </div>
 
 <script>
-const QUICKSCAN_URL = "https://dirk1607.github.io/quickscan/index.html";
+const QUICKSCAN_URL = "https://quickscan.thenextlevel.consulting";
 const CAT_CLASSES = { "KoudContact":"cat-1","Netwerk":"cat-2","WarmeLead":"cat-3","NaEvent":"cat-4","Opvolging":"cat-5","ScanAmbassador":"cat-6","AppTester":"cat-7" };
 
 // ===== DEFAULT TEMPLATES =====
@@ -366,32 +366,32 @@ const DEFAULT_TEMPLATES = {
     subject: "Hoe gezond is uw organisatie écht?",
     body: `Geachte [TITEL_FORMEEL] [NAAM]
 
-Ik ben Dirk Vander Eyken, oprichter van The Next Level. Wij helpen Vlaamse KMO's groeien zonder chaos — via een eigen methodologie die snel in kaart brengt waar een organisatie groei, marge of structuur laat liggen.
+Ik ben Dirk Vander Eyken, founder van The Next Level. Wij helpen Vlaamse KMO's groeien zonder chaos — via onze methodologie die snel in kaart brengt waar een organisatie groei, marge of structuur laat liggen.
 
-We hebben daarvoor een gratis online Quick Scan ontwikkeld. In minder dan 10 minuten krijgt u een visueel beeld van de sterktes en werkpunten van uw bedrijf — zonder verplichtingen.
+We hebben daarvoor een gratis online tool ontwikkeld: de Quick Scan. In minder dan 10 minuten krijgt u een visueel beeld van de sterktes en werkpunten van uw bedrijf — zonder verplichtingen.
 
 Interesse? U vindt de scan hier:
-[QUICKSCAN_URL]
+https://quickscan.thenextlevel.consulting
 
-Met vriendelijke groet,
+Met vriendelijke groeten
 
 Dirk`,
     hints: "Formele aanspreking. Geen aanpasbare velden verplicht."
   },
   "Netwerk": {
-    subject: "Iets wat misschien nuttig is voor [BEDRIJF]",
+    subject: "Klinkt dit als iets voor [BEDRIJF]?",
     body: `Dag [VOORNAAM]
 
-We kennen elkaar al een tijdje, maar ik wilde je even iets doorsturen waar jij misschien iets aan hebt.
+We kennen elkaar al even, maar ik wilde je even iets doorsturen waar jij misschien iets aan hebt.
 
 We hebben bij The Next Level een gratis Quick Scan ontwikkeld waarmee zaakvoerders in 10 minuten een eerlijk beeld krijgen van hoe hun organisatie er écht voor staat — op vlak van strategie, finance, sales, HR, operations en meer.
 
 [✏️ OPTIONEEL: Ik dacht aan jou omdat ...]
 
 Geen verkooppraatje, gewoon een nuttige oefening. Hier is de link:
-[QUICKSCAN_URL]
+https://quickscan.thenextlevel.consulting
 
-Groeten,
+Vriendelijke groeten
 
 Dirk`,
     hints: "✏️ Pas het optionele veld aan met een persoonlijke reden waarom je aan deze persoon dacht."
@@ -404,12 +404,12 @@ Goed dat we elkaar recent konden spreken. Zoals beloofd stuur ik je de link naar
 
 [✏️ OPTIONEEL: Naar aanleiding van ons gesprek over ... leek me dit een goede eerste stap.]
 
-In 10 minuten krijg je een visueel overzicht van waar jouw organisatie sterk staat en waar de grootste groeikansen zitten. Daarna plannen we desgewenst een kort gesprek om de resultaten samen te bekijken.
+In 10 minuten krijg je een visueel overzicht: waar staat jouw organisatie sterk en waar zitten de grootste groeikansen? Daarna plannen we eventueel een kort gesprek om de resultaten samen te bekijken.
 
 Hier is de link:
-[QUICKSCAN_URL]
+https://quickscan.thenextlevel.consulting
 
-Tot binnenkort,
+Tot binnenkort?
 
 Dirk`,
     hints: "✏️ Vul het optionele veld in met het onderwerp van jullie gesprek."
@@ -422,9 +422,11 @@ Fijn dat we elkaar kort konden spreken. [✏️ Vul aan: op/bij ...]
 
 Onze Metroplan Quick Scan is een gratis tool die zaakvoerders in 10 minuten een eerlijk beeld geeft van hun organisatie. Helemaal vrijblijvend — maar altijd verhelderend.
 
-[QUICKSCAN_URL]
+https://quickscan.thenextlevel.consulting
 
-Veel succes alvast, en tot de volgende keer.
+Als je graag meer wil weten over onze tool of onze diensten, aarzel dan niet om contact te nemen.
+
+Veel succes alvast, en tot de volgende keer
 
 Dirk`,
     hints: "✏️ Vul de naam van het event of de gelegenheid in waar jullie elkaar ontmoet hebben."
@@ -435,11 +437,13 @@ Dirk`,
 
 We hadden elkaar al eens gesproken. [✏️ Vul aan: over ... / De timing was toen misschien niet ideaal.]
 
-Ik wilde toch nog eens polsen of onze gratis Quick Scan nu misschien van pas komt. Veel zaakvoerders vinden het een nuttige manier om even een stap terug te zetten en objectief naar hun organisatie te kijken.
+Ik stuur je graag onze gratis online tool Quick Scan door. Misschien kan je er business inzichten uit halen. Veel zaakvoerders vinden het een nuttige manier om even een stap hoger te zetten en in helikopterview naar hun organisatie te kijken.
 
-[QUICKSCAN_URL]
+https://quickscan.thenextlevel.consulting
 
-Geen druk — maar als er iets is waar ik mee kan helpen, hoor ik het graag.
+Geen druk. Als er iets is waar ik mee kan helpen, hoor ik het graag.
+
+Vriendelijke groeten
 
 Dirk`,
     hints: "✏️ Geef context over het eerdere contact: wanneer, waarover, wat er intussen veranderd is."
@@ -448,26 +452,24 @@ Dirk`,
     subject: "Mag ik jou iets vragen?",
     body: `Dag [VOORNAAM]
 
-We hebben een online tool ontwikkeld — de Metroplan Quick Scan — en ik ben op zoek naar een handvol mensen die hem willen uittesten voor ik hem breder uitrol.
+We hebben een online tool ontwikkeld — de Metroplan Quick Scan — en ik ben op zoek naar ervaren bedrijfsleiders die hem willen uittesten vóór ik hem breder uitrol.
 
-Het kost je 10 minuten. Je krijgt er een eerlijk en visueel beeld van hoe jouw organisatie ervoor staat voor terug. Volledig gratis, geen verplichtingen.
+De test duurt 10 minuten. Organisaties krijgen er een eerlijk en visueel beeld van hoe hun organisatie er voor staat. Volledig gratis, geen verplichtingen. Vertrek vanuit jouw eigen rol en krijg "en passant" je eigen screening mee.
 
-[✏️ OPTIONEEL: Ik dacht meteen aan jou omdat ...]
+[✏️ OPTIONEEL: Jij was één van de eersten aan wie ik dacht, omdat ik weet dat je met een scherpe blik naar organisaties / je organisatie kijkt en waardevolle inzichten kunt geven. Jouw feedback zou voor mij bijzonder waardevol zijn om de tool verder te verfijnen. En hopelijk haal je er zelf ook enkele interessante inzichten uit 😊.]
 
-Jouw feedback helpt mij de tool beter maken. En wie weet leer jij er zelf ook iets uit 😊.
-
-Hier is de link: [QUICKSCAN_URL]
+Hier is de link: https://quickscan.thenextlevel.consulting
 
 Alvast bedankt — en zeg gerust wat je ervan vindt.
 
 Dirk`,
-    hints: "✏️ Optioneel: voeg een persoonlijke reden toe waarom je deze persoon vroeg om te testen."
+    hints: "✏️ Optioneel: pas de persoonlijke reden aan waarom je aan deze persoon dacht."
   },
   "AppTester": {
     subject: "Kan ik jou iets vragen?",
     body: `Dag [VOORNAAM]
 
-Ik ben volop bezig met een digitale tool die ik gebruik om zaakvoerders uit te nodigen voor een gratis bedrijfsscan. De tool werkt — maar voor ik hem breder inzet wil ik hem laten screenen door iemand die eerlijk durft zeggen wat er niet klopt.
+Ik ben volop bezig met een digitale tool die ik gebruik om zaakvoerders uit te nodigen voor een gratis Quick Scan. De tool werkt — maar voor ik hem breder inzet, wil ik hem laten screenen door iemand die eerlijk durft zeggen wat voor verbetering vatbaar is (of zelfs niet klopt).
 
 Ik dacht meteen aan jou.
 
@@ -476,11 +478,11 @@ Concreet vraag ik je om de app door te lopen, een paar mails te genereren en me 
 - Wat is verwarrend of omslachtig?
 - Wat ontbreekt er?
 
-Het kost je een halfuurtje. Jouw feedback gebruik ik rechtstreeks om de tool te verbeteren.
+Het kost je een halfuurtje. Jouw feedback gebruik ik om de tool verder te verfijnen. En misschien haal je er zelf ook enkele interessante inzichten uit 😊.
 
-Je vindt de app hier: https://dirk1607.github.io/quickscan/
+Je vindt de app hier: https://quickscan.thenextlevel.consulting
 
-Alvast bedankt.
+Alvast bedankt voor je tijd!
 
 Dirk`,
     hints: "Stuur naar iemand die je goed kent en die eerlijk feedback durft te geven over de tool."
