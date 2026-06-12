@@ -785,9 +785,19 @@ function renderTable() {
       : `<strong>${p.voornaam||'?'} ${p.naam||'?'}</strong> <span class="missing">⚠ ${p.missingFields.join(', ')}</span>`;
     return `<tr class="${sel?'selected':''}" onclick="toggleRow(${p.rowNum},event)">
       <td style="text-align:center"><input type="checkbox" ${sel?'checked':''} ${!p.valid?'disabled':''} onclick="toggleRow(${p.rowNum},event);event.stopPropagation()"></td>
-      <td>${naam}</td>
-      <td style="font-size:12px">${p.bedrijf||'<span class="missing">—</span>'}</td>
-      <td style="color:var(--blue);font-size:12px">${p.email||'<span class="missing">ontbreekt</span>'}</td>
+      <td onclick="event.stopPropagation()">
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <input value="${p.titel||''}" onchange="updateField(${p.rowNum},'titel',this.value)" style="width:48px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:11px;color:var(--muted)" title="Aanspreektitel">
+          <input value="${p.voornaam||''}" onchange="updateField(${p.rowNum},'voornaam',this.value)" style="width:70px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:12px;font-weight:600" title="Voornaam">
+          <input value="${p.naam||''}" onchange="updateField(${p.rowNum},'naam',this.value)" style="width:90px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:12px;font-weight:600" title="Naam">
+        </div>
+      </td>
+      <td onclick="event.stopPropagation()">
+        <input value="${p.bedrijf||''}" onchange="updateField(${p.rowNum},'bedrijf',this.value)" style="width:110px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:12px" title="Bedrijf">
+      </td>
+      <td onclick="event.stopPropagation()">
+        <input value="${p.email||''}" onchange="updateField(${p.rowNum},'email',this.value)" style="width:160px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:12px;color:var(--blue)" title="E-mail">
+      </td>
       <td onclick="event.stopPropagation()">
         <select onchange="updateField(${p.rowNum},'categorie',this.value)" style="border:none;background:transparent;font-size:12px;cursor:pointer;font-family:inherit;padding:2px 4px;border-radius:12px;" class="cat-badge ${cc}">
           <option value="">—</option>
@@ -800,7 +810,9 @@ function renderTable() {
           ${['Nog te contacteren','Verstuurd','Opgevolgd'].map(s => `<option value="${s}" ${p.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
       </td>
-      <td style="font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.notities||''}</td>
+      <td onclick="event.stopPropagation()">
+        <input value="${p.notities||''}" onchange="updateField(${p.rowNum},'notities',this.value)" style="width:120px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:11px;color:var(--muted)" title="Notities" placeholder="notities...">
+      </td>
       <td><button onclick="deleteProspect(${p.rowNum},event)" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:15px" title="Verwijder">🗑️</button></td>
     </tr>`;
   }).join('');
