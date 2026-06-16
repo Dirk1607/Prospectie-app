@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TNL Prospectie App</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --navy: #1B3A6B; --orange: #E8812A; --blue: #4A7CB5;
@@ -36,6 +37,10 @@ header p { color: rgba(255,255,255,0.55); font-size: 12px; }
 .upload-zone:hover { border-color: var(--orange); }
 .upload-zone.drag-over { border-color: var(--orange); background: #fff8f3; }
 .upload-zone.compact { padding: 16px; }
+.upload-zone.compact .upload-icon,
+.upload-zone.compact #uploadZoneTitle,
+.upload-zone.compact #uploadZoneDesc,
+.upload-zone.compact .upload-hint { display: none; }
 .upload-zone h3 { color: var(--navy); font-size: 16px; margin-bottom: 6px; }
 .upload-zone p { color: var(--muted); font-size: 12px; margin-top: 4px; }
 .upload-icon { font-size: 36px; margin-bottom: 10px; }
@@ -82,9 +87,14 @@ select.filter:focus { border-color: var(--blue); }
 .btn-purple:hover { background: #4a1a90; }
 
 /* TABLE */
-.table-wrap { background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(27,58,107,0.07); }
+.table-wrap { background: white; border-radius: 14px; box-shadow: 0 2px 12px rgba(27,58,107,0.07); }
+.table-wrap table { border-radius: 14px; }
+.table-wrap thead th:first-child { border-top-left-radius: 14px; }
+.table-wrap thead th:last-child { border-top-right-radius: 14px; }
+.table-wrap tbody tr:last-child td:first-child { border-bottom-left-radius: 14px; }
+.table-wrap tbody tr:last-child td:last-child { border-bottom-right-radius: 14px; }
 table { width: 100%; border-collapse: collapse; }
-thead th { background: var(--navy); color: white; padding: 12px 13px; text-align: left; font-size: 12px; font-weight: 600; white-space: nowrap; }
+thead th { background: var(--navy); color: white; padding: 12px 13px; text-align: left; font-size: 12px; font-weight: 600; white-space: nowrap; position: sticky; z-index: 50; }
 thead th:first-child { width: 40px; }
 tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
 tbody tr:hover { background: #f0f5ff; }
@@ -103,7 +113,7 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
 .empty-state { text-align: center; padding: 50px; color: var(--muted); font-size: 14px; }
 
 /* ACTION BAR */
-.action-bar { background: white; border-radius: 14px; padding: 18px 22px; box-shadow: 0 2px 12px rgba(27,58,107,0.07); margin-bottom: 16px; display: none; }
+.action-bar { background: white; border-radius: 14px; padding: 18px 22px; box-shadow: 0 2px 12px rgba(27,58,107,0.07); margin-bottom: 16px; display: none; position: sticky; z-index: 95; }
 .action-bar.visible { display: block; }
 .action-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
@@ -155,6 +165,7 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
 </head>
 <body>
 
+<div id="stickyHeaderWrap" style="position:sticky;top:0;z-index:100;background:var(--light);">
 <header>
   <div class="logo-badge">TNL</div>
   <div>
@@ -170,10 +181,7 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
   <button class="tab-btn" onclick="switchTab('instellingen')">⚙️ Instellingen</button>
 </div>
 
-<!-- ===== TAB 1: PROSPECTS ===== -->
-<div id="tab-prospects" class="tab-panel active">
-<div class="container">
-
+<div id="prospectsStickyContent" style="max-width:1300px;margin:0 auto;padding:24px 24px 16px;">
   <!-- UPLOAD -->
   <div class="upload-zone" id="uploadZone">
     <div class="upload-icon">📂</div>
@@ -189,21 +197,14 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
         <input type="file" id="imageInput" accept="image/*">
       </label>
     </div>
-    <p style="margin-top:10px; color:var(--muted); font-size:11px;">Excel: Aanspreektitel · Voornaam · Naam · E-mail (verplicht) + Telefoon · Bedrijf · Categorie · Notities · Datum · Status (facultatief)</p>
-    <p style="color:#9060c0; font-size:11px; margin-top:3px;">📸 Screenshot: zorg dat de kolomhoofding zichtbaar is — AI leest de tabel automatisch uit</p>
+    <p class="upload-hint" style="margin-top:10px; color:var(--muted); font-size:11px;">Excel: Aanspreektitel · Voornaam · Naam · E-mail (verplicht) + Telefoon · Bedrijf · Categorie · Notities · Datum · Status (facultatief)</p>
+    <p class="upload-hint" style="color:#9060c0; font-size:11px; margin-top:3px;">📸 Screenshot: zorg dat de kolomhoofding zichtbaar is — AI leest de tabel automatisch uit</p>
   </div>
 
   <!-- PASTE ZONE -->
   <div class="paste-zone" id="pasteZone" tabindex="0">
     📋 Klik hier en druk <kbd>Ctrl</kbd>+<kbd>V</kbd> om een screenshot rechtstreeks te plakken
   </div>
-
-  <!-- ALERTS -->
-  <div class="alert alert-info" id="alertInfo"></div>
-  <div class="alert alert-dup" id="alertDup"></div>
-  <div class="alert alert-warn" id="alertWarn"></div>
-  <div class="alert alert-ok" id="alertOk"></div>
-  <div class="alert alert-err" id="alertErr"></div>
 
   <!-- STATS -->
   <div class="stats-bar" id="statsBar" style="display:none"></div>
@@ -225,13 +226,25 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
     <button class="btn btn-danger" onclick="deleteSelected()">🗑️ Verwijder selectie</button>
     <button class="btn btn-ghost" onclick="clearAllProspects()" style="color:var(--red);">🗑️ Alles wissen</button>
   </div>
+</div>
+</div>
+
+<!-- ===== TAB 1: PROSPECTS ===== -->
+<div id="tab-prospects" class="tab-panel active">
+<div class="container" style="padding-top:0;">
+
+  <!-- ALERTS -->
+  <div class="alert alert-info" id="alertInfo"></div>
+  <div class="alert alert-dup" id="alertDup"></div>
+  <div class="alert alert-warn" id="alertWarn"></div>
+  <div class="alert alert-ok" id="alertOk"></div>
+  <div class="alert alert-err" id="alertErr"></div>
 
   <!-- ACTION BAR -->
   <div class="action-bar" id="actionBar">
     <div class="action-row">
       <span style="font-weight:700;color:var(--navy);font-size:14px;" id="actionTitle"></span>
-      <button class="btn btn-primary" onclick="switchTab('mails'); loadMailTab()">✉️ Mails versturen</button>
-      <button class="btn btn-navy" onclick="markVerstuurd()">✅ Markeer als verstuurd</button>
+      <button class="btn btn-primary" style="background:var(--green);" onclick="switchTab('mails'); loadMailTab()">✉️ Mails versturen</button>
       <button class="btn btn-ghost" onclick="deselectAll()">Annuleer</button>
     </div>
   </div>
@@ -292,10 +305,10 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
           <span id="mailNavCounter"></span>
           <button class="btn btn-ghost" onclick="navProspect(1)">Volgende →</button>
         </div>
-        <button class="btn btn-primary" onclick="saveOutlookConcept()">📬 Open in Outlook</button>
+        <button class="btn btn-primary" onclick="saveOutlookConcept()">📬 Open in Outlook (web)</button>
       </div>
       <div class="outlook-tip" id="outlookTip" style="display:none;margin-top:12px;padding:10px 14px;background:#e8f4fd;border-left:3px solid var(--blue);border-radius:6px;font-size:13px;color:#1a4a7a;">
-        📬 Outlook geopend. Druk <strong>Ctrl+S</strong> om de mail op te slaan als concept in je conceptenmap.
+        📬 Outlook Web geopend in een nieuw tabblad. Klik op <strong>Verzenden</strong> om te versturen, of sluit het tabblad gewoon — Outlook Web slaat de mail automatisch op als concept.
       </div>
     </div>
   </div>
@@ -325,10 +338,6 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
         <label>Mailtekst <span style="color:var(--muted);font-weight:400;text-transform:none">(gebruik [VOORNAAM], [NAAM], [BEDRIJF] als variabelen)</span></label>
         <textarea class="mail-body" id="settingsBody" style="min-height:360px"></textarea>
       </div>
-      <div class="field-group">
-        <label>Hint (zichtbaar bij het opstellen)</label>
-        <input type="text" id="settingsHint">
-      </div>
       <div class="settings-save-bar">
         <button class="btn btn-primary" onclick="saveTemplate()">💾 Bewaar template</button>
         <button class="btn btn-ghost" onclick="resetTemplate()">↺ Herstel origineel</button>
@@ -357,6 +366,12 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
 </div>
 
 <script>
+// ===== SUPABASE =====
+const sb = window.supabase.createClient(
+  'https://pylfvfcieyrwegcvlwwa.supabase.co',
+  'sb_publishable_jINc1spJu3sUcltJSABpLQ_r_jBNBud'
+);
+
 const QUICKSCAN_URL = "https://quickscan.thenextlevel.consulting";
 const CAT_CLASSES = { "KoudContact":"cat-1","Netwerk":"cat-2","WarmeLead":"cat-3","NaEvent":"cat-4","Opvolging":"cat-5","ScanAmbassador":"cat-6","AppTester":"cat-7" };
 
@@ -369,6 +384,8 @@ const DEFAULT_TEMPLATES = {
 Ik ben Dirk Vander Eyken, founder van The Next Level. Wij helpen Vlaamse KMO's groeien zonder chaos — via onze methodologie die snel in kaart brengt waar een organisatie groei, marge of structuur laat liggen.
 
 We hebben daarvoor een gratis online tool ontwikkeld: de Quick Scan. In minder dan 10 minuten krijgt u een visueel beeld van de sterktes en werkpunten van uw bedrijf — zonder verplichtingen.
+
+P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail — ik neem het vanaf daar over.
 
 Interesse? U vindt de scan hier:
 https://quickscan.thenextlevel.consulting
@@ -388,6 +405,8 @@ We hebben bij The Next Level een gratis Quick Scan ontwikkeld waarmee zaakvoerde
 
 [✏️ OPTIONEEL: Ik dacht aan jou omdat ...]
 
+P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail — ik neem het vanaf daar over.
+
 Geen verkooppraatje, gewoon een nuttige oefening. Hier is de link:
 https://quickscan.thenextlevel.consulting
 
@@ -406,6 +425,8 @@ Goed dat we elkaar recent konden spreken. Zoals beloofd stuur ik je de link naar
 
 In 10 minuten krijg je een visueel overzicht: waar staat jouw organisatie sterk en waar zitten de grootste groeikansen? Daarna plannen we eventueel een kort gesprek om de resultaten samen te bekijken.
 
+P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail — ik neem het vanaf daar over.
+
 Hier is de link:
 https://quickscan.thenextlevel.consulting
 
@@ -421,6 +442,8 @@ Dirk`,
 Fijn dat we elkaar kort konden spreken. [✏️ Vul aan: op/bij ...]
 
 Onze Metroplan Quick Scan is een gratis tool die zaakvoerders in 10 minuten een eerlijk beeld geeft van hun organisatie. Helemaal vrijblijvend — maar altijd verhelderend.
+
+P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail — ik neem het vanaf daar over.
 
 https://quickscan.thenextlevel.consulting
 
@@ -438,6 +461,8 @@ Dirk`,
 We hadden elkaar al eens gesproken. [✏️ Vul aan: over ... / De timing was toen misschien niet ideaal.]
 
 Ik stuur je graag onze gratis online tool Quick Scan door. Misschien kan je er business inzichten uit halen. Veel zaakvoerders vinden het een nuttige manier om even een stap hoger te zetten en in helikopterview naar hun organisatie te kijken.
+
+P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail — ik neem het vanaf daar over.
 
 https://quickscan.thenextlevel.consulting
 
@@ -459,6 +484,8 @@ De test duurt 10 minuten. Organisaties krijgen er een eerlijk en visueel beeld v
 [✏️ OPTIONEEL: Jij was één van de eersten aan wie ik dacht, omdat ik weet dat je met een scherpe blik naar organisaties / je organisatie kijkt en waardevolle inzichten kunt geven.]
 
 Jouw feedback zou voor mij bijzonder waardevol zijn om de tool verder te verfijnen. En hopelijk haal je er zelf ook enkele interessante inzichten uit 😊.
+
+P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail — ik neem het vanaf daar over.
 
 Hier is de link: https://quickscan.thenextlevel.consulting
 
@@ -482,6 +509,8 @@ Concreet vraag ik je om de app door te lopen, een paar mails te genereren en me 
 
 Het kost je een halfuurtje. Jouw feedback gebruik ik om de tool verder te verfijnen. En misschien haal je er zelf ook enkele interessante inzichten uit 😊.
 
+P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail — ik neem het vanaf daar over.
+
 Je vindt de app hier: https://quickscan.thenextlevel.consulting
 
 Alvast bedankt voor je tijd!
@@ -491,22 +520,69 @@ Dirk`,
   }
 };
 
-// Load saved templates from localStorage or use defaults
-let TEMPLATES = JSON.parse(localStorage.getItem('tnl_templates') || 'null') || JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
+// Templates worden vanuit Supabase geladen (zie loadTemplatesFromSupabase); tot dan defaults gebruiken
+let TEMPLATES = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
+
+async function loadTemplatesFromSupabase() {
+  const { data, error } = await sb.from('templates').select('*');
+  if (error) { console.error('Templates laden mislukt:', error.message); return; }
+  if (!data || data.length === 0) {
+    // Tabel is leeg — vul ze eenmalig met de defaults
+    const rows = Object.keys(DEFAULT_TEMPLATES).map(cat => ({
+      categorie: cat, subject: DEFAULT_TEMPLATES[cat].subject,
+      body: DEFAULT_TEMPLATES[cat].body, hints: DEFAULT_TEMPLATES[cat].hints || ''
+    }));
+    await sb.from('templates').insert(rows);
+    return;
+  }
+  data.forEach(row => {
+    TEMPLATES[row.categorie] = { subject: row.subject, body: row.body, hints: row.hints || '' };
+  });
+  // Herlaad het zichtbare formulier met de geladen template
+  if (typeof currentSettingsCat !== 'undefined') {
+    const activeNav = document.querySelector('.settings-nav-item.active');
+    if (activeNav) switchSettingsTab(currentSettingsCat, activeNav);
+  }
+}
 
 // ===== STATE =====
-let allProspects = JSON.parse(localStorage.getItem('tnl_prospects') || '[]');
+let allProspects = [];
 let filtered = [];
 let selectedIndices = new Set();
 let mailProspects = [];
 let mailIdx = 0;
 let currentSettingsCat = "KoudContact";
 
-function clearAllProspects() {
+async function loadProspectsFromSupabase() {
+  const { data, error } = await sb.from('prospects').select('*').order('id', { ascending: true });
+  if (error) { showAlert('Err', '❌ Kon prospects niet laden: ' + error.message); return; }
+  allProspects = data.map(row => ({ ...row, rowNum: row.id, valid: true }));
+  allProspects.forEach(p => {
+    const missing = [];
+    if (!p.voornaam) missing.push('Voornaam');
+    if (!p.naam) missing.push('Naam');
+    if (!p.email) missing.push('E-mail');
+    if (!p.titel) missing.push('Aanspreektitel');
+    if (missing.length > 0) { p.valid = false; p.missingFields = missing; }
+  });
+  if (allProspects.length > 0) {
+    renderStats();
+    renderTable();
+    document.getElementById('statsBar').style.display = 'flex';
+    document.getElementById('toolbar').style.display = 'flex';
+    document.getElementById('tableWrap').style.display = 'block';
+    document.getElementById('uploadZoneTitle').textContent = 'Nog een bestand toevoegen';
+    document.getElementById('uploadZoneDesc').textContent = 'Excel, screenshot of plakken — dubbele e-mails worden overgeslagen.';
+    document.getElementById('uploadZone').classList.add('compact');
+  }
+}
+
+async function clearAllProspects() {
   if (!confirm('Alle prospects wissen? Dit kan niet ongedaan gemaakt worden.')) return;
+  const { error } = await sb.from('prospects').delete().neq('id', 0);
+  if (error) { showAlert('Err', '❌ Fout bij wissen: ' + error.message); return; }
   allProspects = [];
   selectedIndices.clear();
-  saveProspects();
   renderStats();
   renderTable();
   document.getElementById('statsBar').style.display = 'none';
@@ -517,17 +593,14 @@ function clearAllProspects() {
   document.getElementById('uploadZoneDesc').textContent = 'Sleep een Excel-bestand hierheen, of gebruik één van de knoppen hieronder';
 }
 
-function updateField(rowNum, field, value) {
+async function updateField(rowNum, field, value) {
   const p = allProspects.find(x => x.rowNum === rowNum);
   if (!p) return;
   p[field] = value;
-  saveProspects();
+  const { error } = await sb.from('prospects').update({ [field]: value }).eq('id', rowNum);
+  if (error) { showAlert('Err', '❌ Fout bij opslaan: ' + error.message); }
   renderStats();
   renderTable();
-}
-
-function saveProspects() {
-  try { localStorage.setItem('tnl_prospects', JSON.stringify(allProspects)); } catch(e) {}
 }
 
 // ===== TAB SWITCHING =====
@@ -536,6 +609,8 @@ function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   document.querySelectorAll('.tab-btn').forEach(b => { if (b.textContent.toLowerCase().includes(name === 'instellingen' ? 'instel' : name === 'mails' ? 'mail' : 'prosp')) b.classList.add('active'); });
+  document.getElementById('prospectsStickyContent').style.display = (name === 'prospects') ? 'block' : 'none';
+  updateStickyTheadOffset();
 }
 
 // ===== ALERTS =====
@@ -576,52 +651,69 @@ document.addEventListener('paste', async (e) => {
   for (const item of items) {
     if (item.type.startsWith('image/')) {
       const file = item.getAsFile();
-      if (file) { readImageFile(file); break; }
+      if (file) { readImageFile(file); return; }
     }
   }
+  // Geen afbeelding op het klembord — probeer geplakte tabeltekst (bv. gekopieerd uit Excel)
+  const text = e.clipboardData.getData('text/plain');
+  if (!text || !text.trim()) return;
+  const lines = text.replace(/\r/g, '').split('\n').filter(l => l.length > 0);
+  if (lines.length < 2) { showAlert('Err', '❌ Plak een volledige tabel met kolomhoofding + minstens 1 rij data.'); return; }
+  const splitLine = line => line.includes('\t') ? line.split('\t') : line.includes(';') ? line.split(';') : line.split(',');
+  const rows = lines.map(splitLine);
+  const dataRows = rowsToProspectData(rows);
+  if (!dataRows || dataRows.length === 0) { showAlert('Err', '❌ Geen geldige tabel-data herkend in de geplakte tekst.'); return; }
+  await processProspectRows(dataRows, 'plakken');
 });
+
+// ===== KOLOMHERKENNING (gedeeld door Excel-import en plakken) =====
+function rowsToProspectData(rows) {
+  if (rows.length < 2) return null;
+  const header = rows[0].map(h => String(h).toLowerCase().trim());
+  const colMap = {};
+  header.forEach((h, i) => {
+    if (h.includes('titel') || h.includes('aanspree')) colMap.titel = i;
+    else if (h.includes('voornaam')) colMap.voornaam = i;
+    else if (h === 'naam' || h.includes('familienaam') || h.includes('achternaam')) colMap.naam = i;
+    else if (h.includes('mail')) colMap.email = i;
+    else if (h.includes('telefoon') || h.includes('gsm') || h.includes('tel')) colMap.telefoon = i;
+    else if (h.includes('bedrijf') || h.includes('organisatie')) colMap.bedrijf = i;
+    else if (h.includes('categorie') || h.includes('type') || h.includes('soort')) colMap.categorie = i;
+    else if (h.includes('notitie') || h.includes('opmerking') || h.includes('nota')) colMap.notities = i;
+    else if (h.includes('datum') || h.includes('date')) colMap.datum = i;
+    else if (h.includes('status')) colMap.status = i;
+  });
+  const dataRows = [];
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (r.every(c => !c)) continue;
+    dataRows.push({
+      titel: colMap.titel !== undefined ? String(r[colMap.titel]).trim() : '',
+      voornaam: colMap.voornaam !== undefined ? String(r[colMap.voornaam]).trim() : '',
+      naam: colMap.naam !== undefined ? String(r[colMap.naam]).trim() : '',
+      email: colMap.email !== undefined ? String(r[colMap.email]).trim() : '',
+      telefoon: colMap.telefoon !== undefined ? String(r[colMap.telefoon]).trim() : '',
+      bedrijf: colMap.bedrijf !== undefined ? String(r[colMap.bedrijf]).trim() : '',
+      categorie: colMap.categorie !== undefined ? String(r[colMap.categorie]).trim() : '',
+      notities: colMap.notities !== undefined ? String(r[colMap.notities]).trim() : '',
+      datum: colMap.datum !== undefined ? String(r[colMap.datum]).trim() : '',
+      status: colMap.status !== undefined ? String(r[colMap.status]).trim() : '',
+    });
+  }
+  return dataRows;
+}
 
 // ===== EXCEL LOADING =====
 function loadFile(file) {
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = e => {
+  reader.onload = async e => {
     const wb = XLSX.read(e.target.result, { type: 'array' });
     const ws = wb.Sheets[wb.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
     if (rows.length < 2) return showAlert('Err', 'Geen data gevonden in het bestand.');
-    const header = rows[0].map(h => String(h).toLowerCase().trim());
-    const colMap = {};
-    header.forEach((h, i) => {
-      if (h.includes('titel') || h.includes('aanspree')) colMap.titel = i;
-      else if (h.includes('voornaam')) colMap.voornaam = i;
-      else if (h === 'naam' || h.includes('familienaam') || h.includes('achternaam')) colMap.naam = i;
-      else if (h.includes('mail')) colMap.email = i;
-      else if (h.includes('telefoon') || h.includes('gsm') || h.includes('tel')) colMap.telefoon = i;
-      else if (h.includes('bedrijf') || h.includes('organisatie')) colMap.bedrijf = i;
-      else if (h.includes('categorie') || h.includes('type') || h.includes('soort')) colMap.categorie = i;
-      else if (h.includes('notitie') || h.includes('opmerking') || h.includes('nota')) colMap.notities = i;
-      else if (h.includes('datum') || h.includes('date')) colMap.datum = i;
-      else if (h.includes('status')) colMap.status = i;
-    });
-    const dataRows = [];
-    for (let i = 1; i < rows.length; i++) {
-      const r = rows[i];
-      if (r.every(c => !c)) continue;
-      dataRows.push({
-        titel: colMap.titel !== undefined ? String(r[colMap.titel]).trim() : '',
-        voornaam: colMap.voornaam !== undefined ? String(r[colMap.voornaam]).trim() : '',
-        naam: colMap.naam !== undefined ? String(r[colMap.naam]).trim() : '',
-        email: colMap.email !== undefined ? String(r[colMap.email]).trim() : '',
-        telefoon: colMap.telefoon !== undefined ? String(r[colMap.telefoon]).trim() : '',
-        bedrijf: colMap.bedrijf !== undefined ? String(r[colMap.bedrijf]).trim() : '',
-        categorie: colMap.categorie !== undefined ? String(r[colMap.categorie]).trim() : '',
-        notities: colMap.notities !== undefined ? String(r[colMap.notities]).trim() : '',
-        datum: colMap.datum !== undefined ? String(r[colMap.datum]).trim() : '',
-        status: colMap.status !== undefined ? String(r[colMap.status]).trim() : '',
-      });
-    }
-    processProspectRows(dataRows, file.name);
+    const dataRows = rowsToProspectData(rows);
+    await processProspectRows(dataRows, file.name);
   };
   reader.readAsArrayBuffer(file);
 }
@@ -662,7 +754,7 @@ async function readImageFile(file) {
     try { rows = JSON.parse(text.replace(/```json|```/g, '').trim()); }
     catch(e) { throw new Error('AI kon de tabel niet uitlezen. Zorg dat de kolomhoofding zichtbaar is.'); }
     if (!Array.isArray(rows) || rows.length === 0) throw new Error('Geen rijen gevonden in de afbeelding.');
-    processProspectRows(rows, 'screenshot');
+    await processProspectRows(rows, 'screenshot');
   } catch(err) {
     showAlert('Err', '❌ ' + err.message);
   }
@@ -678,11 +770,10 @@ function fileToBase64(file) {
 }
 
 // ===== PROCESS ROWS (shared) =====
-function processProspectRows(rows, source) {
+async function processProspectRows(rows, source) {
   const existingEmails = new Map();
   allProspects.forEach(p => { if (p.email) existingEmails.set(p.email.toLowerCase(), p); });
   const newProspects = [], warnings = [], duplicates = [];
-  const nextRowNum = allProspects.length > 0 ? Math.max(...allProspects.map(p => p.rowNum)) + 1 : 1;
 
   const catMap = {
     'apptester': 'AppTester', 'app tester': 'AppTester', 'tester echt': 'AppTester', 'tester écht': 'AppTester',
@@ -700,7 +791,6 @@ function processProspectRows(rows, source) {
 
   rows.forEach((r, i) => {
     const p = {
-      rowNum: nextRowNum + newProspects.length,
       titel: String(r.titel || '').trim(),
       voornaam: String(r.voornaam || '').trim(),
       naam: String(r.naam || '').trim(),
@@ -729,9 +819,18 @@ function processProspectRows(rows, source) {
     }
   });
 
+  if (newProspects.length > 0) {
+    const toInsert = newProspects.map(p => ({
+      titel: p.titel, voornaam: p.voornaam, naam: p.naam, email: p.email,
+      telefoon: p.telefoon, bedrijf: p.bedrijf, categorie: p.categorie,
+      notities: p.notities, datum: p.datum, status: p.status
+    }));
+    const { data, error } = await sb.from('prospects').insert(toInsert).select();
+    if (error) { showAlert('Err', '❌ Fout bij opslaan naar database: ' + error.message); return; }
+    data.forEach((row, i) => { newProspects[i].id = row.id; newProspects[i].rowNum = row.id; });
+  }
   allProspects = [...allProspects, ...newProspects];
   selectedIndices.clear();
-  saveProspects();
 
   // Show results
   if (duplicates.length > 0) showAlert('Dup', `⚠️ <strong>${duplicates.length} dubbel(s) overgeslagen:</strong><br>${duplicates.map(d => '• ' + d).join('<br>')}${newProspects.length > 0 ? '<br><br>✅ <strong>' + newProspects.length + ' nieuwe prospects toegevoegd. Totaal: ' + allProspects.length + '</strong>' : ''}`);
@@ -787,7 +886,11 @@ function renderTable() {
       <td style="text-align:center"><input type="checkbox" ${sel?'checked':''} ${!p.valid?'disabled':''} onclick="toggleRow(${p.rowNum},event);event.stopPropagation()"></td>
       <td onclick="event.stopPropagation()">
         <div style="display:flex;gap:4px;flex-wrap:wrap">
-          <input value="${p.titel||''}" onchange="updateField(${p.rowNum},'titel',this.value)" style="width:48px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:11px;color:var(--muted)" title="Aanspreektitel">
+          <select onchange="updateField(${p.rowNum},'titel',this.value)" style="width:58px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:11px;color:var(--muted)" title="Aanspreektitel">
+            <option value="" ${!p.titel?'selected':''}>?</option>
+            <option value="Dhr." ${p.titel==='Dhr.'?'selected':''}>Dhr.</option>
+            <option value="Mevr." ${p.titel==='Mevr.'?'selected':''}>Mevr.</option>
+          </select>
           <input value="${p.voornaam||''}" onchange="updateField(${p.rowNum},'voornaam',this.value)" style="width:70px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:12px;font-weight:600" title="Voornaam">
           <input value="${p.naam||''}" onchange="updateField(${p.rowNum},'naam',this.value)" style="width:90px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:12px;font-weight:600" title="Naam">
         </div>
@@ -833,27 +936,29 @@ function deselectAll() { selectedIndices.clear(); renderTable(); }
 function updateActionBar() {
   const bar = document.getElementById('actionBar');
   const n = selectedIndices.size;
-  if (n === 0) { bar.classList.remove('visible'); return; }
+  if (n === 0) { bar.classList.remove('visible'); updateStickyTheadOffset(); return; }
   bar.classList.add('visible');
   document.getElementById('actionTitle').textContent = `${n} prospect${n>1?'s':''} geselecteerd`;
+  updateStickyTheadOffset();
 }
 
-function deleteProspect(rowNum, e) {
+async function deleteProspect(rowNum, e) {
   e.stopPropagation();
+  const { error } = await sb.from('prospects').delete().eq('id', rowNum);
+  if (error) { showAlert('Err', '❌ Fout bij verwijderen: ' + error.message); return; }
   allProspects = allProspects.filter(p => p.rowNum !== rowNum);
   selectedIndices.delete(rowNum);
-  saveProspects(); renderStats(); renderTable();
+  renderStats(); renderTable();
 }
-function deleteSelected() {
+async function deleteSelected() {
   if (!selectedIndices.size) return;
   if (!confirm(`${selectedIndices.size} prospect(s) definitief verwijderen?`)) return;
+  const ids = [...selectedIndices];
+  const { error } = await sb.from('prospects').delete().in('id', ids);
+  if (error) { showAlert('Err', '❌ Fout bij verwijderen: ' + error.message); return; }
   allProspects = allProspects.filter(p => !selectedIndices.has(p.rowNum));
   selectedIndices.clear();
-  saveProspects(); renderStats(); renderTable();
-}
-function markVerstuurd() {
-  selectedIndices.forEach(rn => { const p = allProspects.find(x => x.rowNum===rn); if(p) p.status='Verstuurd'; });
-  saveProspects(); deselectAll(); renderStats();
+  renderStats(); renderTable();
 }
 
 // ===== TAB 2: MAILS =====
@@ -909,9 +1014,16 @@ function applyTemplate(p, cat) {
   document.getElementById('mailHint').textContent = tpl.hints || '';
 }
 
-function reloadTemplate() {
+async function reloadTemplate() {
   const p = mailProspects[mailIdx];
-  if (p) applyTemplate(p, document.getElementById('mailCatSelect').value);
+  if (!p) return;
+  const nieuweCat = document.getElementById('mailCatSelect').value;
+  applyTemplate(p, nieuweCat);
+  if (p.categorie !== nieuweCat) {
+    await updateField(p.rowNum, 'categorie', nieuweCat);
+    p.categorie = nieuweCat;
+    renderProspectList();
+  }
 }
 
 function navProspect(dir) {
@@ -919,13 +1031,15 @@ function navProspect(dir) {
   loadMailProspect(newIdx);
 }
 
-function saveOutlookConcept() {
+async function saveOutlookConcept() {
   const p = mailProspects[mailIdx];
   const subj = encodeURIComponent(document.getElementById('mailSubject').value);
   const body = encodeURIComponent(document.getElementById('mailBody').value);
-  const a = document.createElement('a');
-  a.href = `mailto:${p.email}?subject=${subj}&body=${body}`;
-  a.click();
+  const to = encodeURIComponent(p.email);
+  window.open(`https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${subj}&body=${body}`, '_blank');
+  await updateField(p.rowNum, 'status', 'Verstuurd');
+  p.status = 'Verstuurd';
+  renderProspectList();
   const tip = document.getElementById('outlookTip');
   tip.style.display = 'block';
   setTimeout(() => { tip.style.display = 'none'; }, 6000);
@@ -964,42 +1078,58 @@ function switchSettingsTab(cat, el) {
   const tpl = TEMPLATES[cat];
   document.getElementById('settingsSubject').value = tpl.subject;
   document.getElementById('settingsBody').value = tpl.body;
-  document.getElementById('settingsHint').value = tpl.hints || '';
 }
 
-function saveTemplate() {
-  TEMPLATES[currentSettingsCat] = {
+async function saveTemplate() {
+  const tpl = {
     subject: document.getElementById('settingsSubject').value,
     body: document.getElementById('settingsBody').value,
-    hints: document.getElementById('settingsHint').value
+    hints: TEMPLATES[currentSettingsCat] ? TEMPLATES[currentSettingsCat].hints || '' : ''
   };
-  localStorage.setItem('tnl_templates', JSON.stringify(TEMPLATES));
+  TEMPLATES[currentSettingsCat] = tpl;
+  const { error } = await sb.from('templates').upsert({ categorie: currentSettingsCat, ...tpl });
+  if (error) { showAlert('Err', '❌ Fout bij opslaan template: ' + error.message); return; }
   const el = document.getElementById('saveOk');
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2500);
 }
 
-function resetTemplate() {
+async function resetTemplate() {
   if (!confirm('Originele template herstellen? Uw wijzigingen gaan verloren.')) return;
   TEMPLATES[currentSettingsCat] = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES[currentSettingsCat]));
-  localStorage.setItem('tnl_templates', JSON.stringify(TEMPLATES));
+  const { error } = await sb.from('templates').upsert({ categorie: currentSettingsCat, ...TEMPLATES[currentSettingsCat] });
+  if (error) { showAlert('Err', '❌ Fout bij herstellen: ' + error.message); return; }
   switchSettingsTab(currentSettingsCat, document.querySelector('.settings-nav-item.active'));
 }
 
 // Load initial settings view
 switchSettingsTab('KoudContact', document.querySelector('.settings-nav-item'));
 
-// Restore prospects from localStorage on startup
-if (allProspects.length > 0) {
-  renderStats();
-  renderTable();
-  document.getElementById('statsBar').style.display = 'flex';
-  document.getElementById('toolbar').style.display = 'flex';
-  document.getElementById('tableWrap').style.display = 'block';
-  document.getElementById('uploadZoneTitle').textContent = 'Nog een bestand toevoegen';
-  document.getElementById('uploadZoneDesc').textContent = 'Excel, screenshot of plakken — dubbele e-mails worden overgeslagen.';
-  document.getElementById('uploadZone').classList.add('compact');
-  showAlert('Ok', '✅ <strong>' + allProspects.length + ' prospects</strong> hersteld vanuit vorige sessie.', 3000);
+// Laad prospects en templates vanuit Supabase bij opstarten
+loadProspectsFromSupabase();
+loadTemplatesFromSupabase();
+
+// Tabelheader + actiebalk sticky houden net onder de volledige sticky kop (header+tabs+upload+stats+zoekbalk)
+function updateStickyTheadOffset() {
+  const wrap = document.getElementById('stickyHeaderWrap');
+  if (!wrap) return;
+  const h = Math.ceil(wrap.getBoundingClientRect().height);
+  const actionBar = document.getElementById('actionBar');
+  const actionBarVisible = actionBar && actionBar.classList.contains('visible');
+  if (actionBar) {
+    actionBar.style.top = h + 'px';
+  }
+  const actionBarHeight = actionBarVisible ? Math.ceil(actionBar.getBoundingClientRect().height) : 0;
+  const theadTop = (h + actionBarHeight) + 'px';
+  document.querySelectorAll('thead th').forEach(th => th.style.top = theadTop);
+}
+updateStickyTheadOffset();
+window.addEventListener('load', updateStickyTheadOffset);
+window.addEventListener('resize', updateStickyTheadOffset);
+// ResizeObserver vangt élke hoogtewijziging van de sticky kop op (compacte upload, stats/toolbar tonen, tekst-reflow, ...)
+const _stickyWrapEl = document.getElementById('stickyHeaderWrap');
+if (_stickyWrapEl && typeof ResizeObserver !== 'undefined') {
+  new ResizeObserver(updateStickyTheadOffset).observe(_stickyWrapEl);
 }
 
 // API KEY
