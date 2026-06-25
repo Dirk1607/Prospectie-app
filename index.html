@@ -282,7 +282,7 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
             <option>Nog te contacteren</option><option>Verstuurd</option><option>Scan ingevuld</option>
           </select></div></th>
           <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">Notities<input type="text" id="fNotities" placeholder="🔍 zoek..." oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%"></div></th>
-          <th style="width:40px"></th>
+          <th style="width:72px"></th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
@@ -376,7 +376,7 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
 </div>
 
 <!-- API KEY MODAL -->
-<div id="apiKeyOverlay" style="display:none;position:fixed;inset:0;background:rgba(10,20,50,0.7);z-index:200;align-items:center;justify-content:center;">
+<div id="apiKeyOverlay" style="display:none;position:fixed;inset:0;background:rgba(10,20,50,0.7);z-index:400;align-items:center;justify-content:center;">
   <div style="background:white;border-radius:16px;padding:32px;max-width:480px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
     <h2 style="color:#1B3A6B;font-size:18px;margin-bottom:8px;">🔑 API-sleutel vereist</h2>
     <p style="color:#6b7a99;font-size:13px;margin-bottom:20px;">Om screenshots uit te lezen heeft de app uw Anthropic API-sleutel nodig. De sleutel wordt lokaal opgeslagen in uw browser en nooit gedeeld.</p>
@@ -389,6 +389,38 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
       <button onclick="document.getElementById('apiKeyOverlay').style.display='none'" style="background:white;color:#1B3A6B;border:1.5px solid #D0DCF0;border-radius:8px;padding:11px 16px;font-size:14px;cursor:pointer;">Annuleer</button>
     </div>
     <p style="font-size:11px;color:#6b7a99;margin-top:12px;">Uw sleutel vindt u op <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:#4A7CB5;">console.anthropic.com</a></p>
+  </div>
+</div>
+
+<!-- OPVOLGING / DETAIL -->
+<div id="detailOverlay" style="display:none;position:fixed;inset:0;background:rgba(10,20,50,0.7);z-index:300;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:white;border-radius:16px;padding:24px 28px;max-width:760px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h2 id="detailTitle" style="color:var(--navy);font-size:18px;">Opvolging</h2>
+      <button onclick="closeDetail()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);">✕</button>
+    </div>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px;">
+      <label style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);">Volgende stap
+        <input id="dVolgendeStap" type="text" onchange="saveDetailField('volgende_stap', this.value)" placeholder="bv. bellen voor offerte" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);">Datum
+        <input id="dVolgendeStapDatum" type="date" onchange="saveDetailField('volgende_stap_datum', this.value)" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;">
+      </label>
+    </div>
+
+    <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px;">Nieuwe notitie / mailinhoud toevoegen aan het verloop</label>
+    <textarea id="dNieuweNotitie" rows="3" placeholder="Plak hier mailtekst of typ een gespreksnotitie..." style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;resize:vertical;font-family:inherit;"></textarea>
+    <button onclick="addVerloopEntry()" class="btn-upload" style="margin-top:8px;padding:8px 16px;">➕ Toevoegen aan verloop</button>
+
+    <label style="display:block;font-size:12px;color:var(--muted);margin:18px 0 4px;">Verloop (datumjournaal)</label>
+    <textarea id="dVerloop" rows="8" onchange="saveDetailField('verloop', this.value)" placeholder="Nog geen verloop." style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;resize:vertical;font-family:inherit;line-height:1.5;"></textarea>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:18px 0 4px;">
+      <label style="font-size:12px;color:var(--muted);">AI-samenvatting (waar staan we?)</label>
+      <button id="dSamenvatBtn" onclick="summarizeProspect()" class="btn-upload" style="padding:7px 14px;background:var(--purple);">🤖 Vat samen</button>
+    </div>
+    <div id="dSamenvatting" style="border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.6;background:var(--light);white-space:pre-wrap;min-height:60px;color:var(--text);">—</div>
   </div>
 </div>
 
@@ -950,7 +982,7 @@ function renderTable() {
       <td onclick="event.stopPropagation()">
         <input value="${p.notities||''}" onchange="updateField(${p.rowNum},'notities',this.value)" style="width:120px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:11px;color:var(--muted)" title="Notities" placeholder="notities...">
       </td>
-      <td><button onclick="deleteProspect(${p.rowNum},event)" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:15px" title="Verwijder">🗑️</button></td>
+      <td style="white-space:nowrap"><button onclick="openDetail(${p.rowNum},event)" style="background:none;border:none;cursor:pointer;font-size:15px;color:${(p.verloop||p.volgende_stap||p.samenvatting)?'var(--orange)':'#bbb'}" title="Opvolging / notities">📝</button> <button onclick="deleteProspect(${p.rowNum},event)" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:15px" title="Verwijder">🗑️</button></td>
     </tr>`;
   }).join('');
   updateActionBar();
@@ -993,6 +1025,78 @@ async function deleteSelected() {
   allProspects = allProspects.filter(p => !selectedIndices.has(p.rowNum));
   selectedIndices.clear();
   renderStats(); renderTable();
+}
+
+// ===== OPVOLGING / DETAIL =====
+let currentDetailRow = null;
+function openDetail(rowNum, e) {
+  if (e) e.stopPropagation();
+  const p = allProspects.find(x => x.rowNum === rowNum);
+  if (!p) return;
+  currentDetailRow = rowNum;
+  document.getElementById('detailTitle').textContent = 'Opvolging — ' + (p.voornaam||'') + ' ' + (p.naam||'') + (p.bedrijf ? ' ('+p.bedrijf+')' : '');
+  document.getElementById('dVolgendeStap').value = p.volgende_stap || '';
+  document.getElementById('dVolgendeStapDatum').value = p.volgende_stap_datum || '';
+  document.getElementById('dVerloop').value = p.verloop || '';
+  document.getElementById('dNieuweNotitie').value = '';
+  document.getElementById('dSamenvatting').textContent = p.samenvatting || '—';
+  document.getElementById('detailOverlay').style.display = 'flex';
+}
+function closeDetail() { document.getElementById('detailOverlay').style.display = 'none'; currentDetailRow = null; }
+
+async function saveDetailField(field, value) {
+  if (currentDetailRow == null) return;
+  if (field === 'volgende_stap_datum' && !value) value = null; // lege datum -> null (geen db-fout)
+  await updateField(currentDetailRow, field, value);
+}
+
+async function addVerloopEntry() {
+  const txt = document.getElementById('dNieuweNotitie').value.trim();
+  if (!txt) return;
+  const datum = new Date().toLocaleDateString('nl-BE');
+  const ta = document.getElementById('dVerloop');
+  const entry = '=== ' + datum + ' ===\n' + txt;
+  ta.value = ta.value.trim() ? entry + '\n\n' + ta.value : entry;
+  document.getElementById('dNieuweNotitie').value = '';
+  await saveDetailField('verloop', ta.value);
+}
+
+async function summarizeProspect() {
+  if (currentDetailRow == null) return;
+  const verloop = document.getElementById('dVerloop').value.trim();
+  if (!verloop) { showAlert('Err', '❌ Er is nog geen verloop om samen te vatten.'); return; }
+  const apiKey = localStorage.getItem('tnl_api_key');
+  if (!apiKey) { showApiKeyModal(); return; }
+  const btn = document.getElementById('dSamenvatBtn');
+  const box = document.getElementById('dSamenvatting');
+  const oldTxt = btn.textContent;
+  btn.disabled = true; btn.textContent = '🤖 Bezig...';
+  box.textContent = 'Claude denkt na...';
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 700,
+        messages: [{ role:'user', content:
+          'Hieronder staat de correspondentie en notities met een prospect. Vat in het Nederlands bondig en zakelijk samen met deze korte kopjes:\n' +
+          '• Waar staan we? (status in 1-2 zinnen)\n• Wat is er besproken/afgesproken?\n• Openstaande punten\n• Voorgestelde volgende stap\n\n' +
+          'Hou het kort. Geen inleiding, begin meteen met de kopjes.\n\n--- VERLOOP ---\n' + verloop
+        }]
+      })
+    });
+    const data = await resp.json();
+    if (!resp.ok || data.error) throw new Error(data.error ? data.error.message : 'API-fout: ' + resp.status);
+    const text = (data.content||[]).map(b => b.text||'').join('').trim();
+    if (!text) throw new Error('Leeg antwoord van de AI.');
+    box.textContent = text;
+    await saveDetailField('samenvatting', text);
+  } catch(err) {
+    box.textContent = '❌ ' + err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = oldTxt;
+  }
 }
 
 // ===== TAB 2: MAILS =====
