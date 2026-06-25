@@ -183,22 +183,46 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
 
 <div id="prospectsStickyContent" style="max-width:1300px;margin:0 auto;padding:24px 24px 16px;">
   <!-- UPLOAD -->
-  <div class="upload-zone" id="uploadZone">
-    <div class="upload-icon">📂</div>
-    <h3 id="uploadZoneTitle">Laad uw prospectlijst in</h3>
-    <p id="uploadZoneDesc">Sleep een Excel-bestand hierheen, of gebruik één van de knoppen hieronder</p>
-    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:14px;">
-      <label class="btn-upload">
-        📊 Kies Excel-bestand
-        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+  <div id="manualAdd" style="border:2px solid var(--border);border-radius:14px;background:white;padding:18px 22px;margin-bottom:16px;">
+    <h3 style="color:var(--navy);font-size:16px;margin-bottom:12px;">➕ Prospect handmatig toevoegen</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+      <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">Aanspreektitel
+        <select id="mTitel" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;">
+          <option value="">?</option><option value="Dhr.">Dhr.</option><option value="Mevr.">Mevr.</option>
+        </select>
       </label>
-      <label class="btn-upload" style="background:var(--purple);">
-        🖼️ Kies screenshot
-        <input type="file" id="imageInput" accept="image/*">
+      <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">Voornaam
+        <input id="mVoornaam" type="text" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;width:110px;">
       </label>
+      <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">Naam
+        <input id="mNaam" type="text" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;width:120px;">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">E-mail
+        <input id="mEmail" type="email" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;width:200px;">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">Telefoon
+        <input id="mTelefoon" type="text" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;width:120px;">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">Bedrijf
+        <input id="mBedrijf" type="text" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;width:140px;">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">Categorie
+        <select id="mCategorie" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;">
+          <option value="">(geen)</option>
+          <option>KoudContact</option><option>Netwerk</option><option>WarmeLead</option><option>NaEvent</option><option>Opvolging</option><option>ScanAmbassador</option><option>AppTester</option>
+        </select>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">Status
+        <select id="mStatus" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;">
+          <option>Nog te contacteren</option><option>Verstuurd</option><option>Opgevolgd</option>
+        </select>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">Notities
+        <input id="mNotities" type="text" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;width:160px;">
+      </label>
+      <button class="btn-upload" onclick="addManualContact()" style="padding:10px 20px;">➕ Toevoegen</button>
     </div>
-    <p class="upload-hint" style="margin-top:10px; color:var(--muted); font-size:11px;">Excel: Aanspreektitel · Voornaam · Naam · E-mail (verplicht) + Telefoon · Bedrijf · Categorie · Notities · Datum · Status (facultatief)</p>
-    <p class="upload-hint" style="color:#9060c0; font-size:11px; margin-top:3px;">📸 Screenshot: zorg dat de kolomhoofding zichtbaar is — AI leest de tabel automatisch uit</p>
+    <p style="color:var(--muted);font-size:11px;margin-top:10px;">Verplicht: Aanspreektitel · Voornaam · Naam · E-mail. Dubbele e-mails worden overgeslagen.</p>
   </div>
 
   <!-- PASTE ZONE -->
@@ -571,9 +595,6 @@ async function loadProspectsFromSupabase() {
     document.getElementById('statsBar').style.display = 'flex';
     document.getElementById('toolbar').style.display = 'flex';
     document.getElementById('tableWrap').style.display = 'block';
-    document.getElementById('uploadZoneTitle').textContent = 'Nog een bestand toevoegen';
-    document.getElementById('uploadZoneDesc').textContent = 'Excel, screenshot of plakken — dubbele e-mails worden overgeslagen.';
-    document.getElementById('uploadZone').classList.add('compact');
   }
 }
 
@@ -588,9 +609,6 @@ async function clearAllProspects() {
   document.getElementById('statsBar').style.display = 'none';
   document.getElementById('toolbar').style.display = 'none';
   document.getElementById('tableWrap').style.display = 'none';
-  document.getElementById('uploadZone').classList.remove('compact');
-  document.getElementById('uploadZoneTitle').textContent = 'Laad uw prospectlijst in';
-  document.getElementById('uploadZoneDesc').textContent = 'Sleep een Excel-bestand hierheen, of gebruik één van de knoppen hieronder';
 }
 
 async function updateField(rowNum, field, value) {
@@ -625,20 +643,31 @@ function showAlert(type, msg, autohide) {
   if (autohide) setTimeout(() => el.classList.remove('show'), autohide);
 }
 
-// ===== UPLOAD =====
-document.getElementById('fileInput').addEventListener('change', e => { loadFile(e.target.files[0]); e.target.value = ''; });
-document.getElementById('imageInput').addEventListener('change', e => { readImageFile(e.target.files[0]); e.target.value = ''; });
-
-const zone = document.getElementById('uploadZone');
-zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-zone.addEventListener('drop', e => {
-  e.preventDefault(); zone.classList.remove('drag-over');
-  const file = e.dataTransfer.files[0];
-  if (!file) return;
-  if (file.type.startsWith('image/')) readImageFile(file);
-  else loadFile(file);
-});
+// ===== HANDMATIG PROSPECT TOEVOEGEN =====
+async function addManualContact() {
+  const val = id => document.getElementById(id).value.trim();
+  const row = {
+    titel: val('mTitel'),
+    voornaam: val('mVoornaam'),
+    naam: val('mNaam'),
+    email: val('mEmail'),
+    telefoon: val('mTelefoon'),
+    bedrijf: val('mBedrijf'),
+    categorie: val('mCategorie'),
+    notities: val('mNotities'),
+    datum: new Date().toLocaleDateString('nl-BE'),
+    status: val('mStatus') || 'Nog te contacteren'
+  };
+  if (!row.voornaam && !row.naam && !row.email) {
+    showAlert('Err', '❌ Vul minstens voornaam, naam en e-mail in.');
+    return;
+  }
+  // hergebruikt de gedeelde verwerking: dedup van dubbele e-mails, validatie en opslaan in Supabase
+  await processProspectRows([row], 'handmatige invoer');
+  // velden leegmaken voor het volgende contact (titel/categorie/status blijven staan)
+  ['mVoornaam','mNaam','mEmail','mTelefoon','mBedrijf','mNotities'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('mVoornaam').focus();
+}
 
 // PASTE ZONE
 const pasteZone = document.getElementById('pasteZone');
@@ -843,9 +872,6 @@ async function processProspectRows(rows, source) {
   document.getElementById('statsBar').style.display = 'flex';
   document.getElementById('toolbar').style.display = 'flex';
   document.getElementById('tableWrap').style.display = 'block';
-  document.getElementById('uploadZoneTitle').textContent = 'Nog een bestand toevoegen';
-  document.getElementById('uploadZoneDesc').textContent = 'Excel, screenshot of plakken — dubbele e-mails worden overgeslagen.';
-  zone.classList.add('compact');
 }
 
 // ===== RENDER =====
