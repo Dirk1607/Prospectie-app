@@ -109,6 +109,7 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
 .cat-5 { background: #f0e8fd; color: #6a2ab0; }
 .cat-6 { background: #e8fdf8; color: #0a7a6a; }
 .cat-7 { background: #fff0e8; color: #b04010; }
+.cat-8 { background: #fce8f3; color: #9d1c6b; }
 .missing { color: var(--red); font-style: italic; font-size: 11px; }
 .empty-state { text-align: center; padding: 50px; color: var(--muted); font-size: 14px; }
 
@@ -209,7 +210,7 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
       <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">Categorie
         <select id="mCategorie" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;">
           <option value="">(geen)</option>
-          <option>KoudContact</option><option>Netwerk</option><option>WarmeLead</option><option>NaEvent</option><option>Opvolging</option><option>ScanAmbassador</option><option>AppTester</option>
+          <option>KoudContact</option><option>Netwerk</option><option>WarmeLead</option><option>NaEvent</option><option>Opvolging</option><option>ScanAmbassador</option><option>AppTester</option><option>Persoonlijk</option>
         </select>
       </label>
       <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">Status
@@ -274,7 +275,7 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
           <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">E-mail<input type="text" id="fEmail" placeholder="🔍 zoek..." oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%"></div></th>
           <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">Categorie<select id="fCategorie" onchange="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%">
             <option value="">Alle</option>
-            <option>KoudContact</option><option>Netwerk</option><option>WarmeLead</option><option>NaEvent</option><option>Opvolging</option><option>ScanAmbassador</option><option>AppTester</option>
+            <option>KoudContact</option><option>Netwerk</option><option>WarmeLead</option><option>NaEvent</option><option>Opvolging</option><option>ScanAmbassador</option><option>AppTester</option><option>Persoonlijk</option>
           </select></div></th>
           <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">Status<select id="fStatus" onchange="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%">
             <option value="">Alle</option>
@@ -399,7 +400,7 @@ const sb = window.supabase.createClient(
 );
 
 const QUICKSCAN_URL = "https://quickscan.thenextlevel.consulting";
-const CAT_CLASSES = { "KoudContact":"cat-1","Netwerk":"cat-2","WarmeLead":"cat-3","NaEvent":"cat-4","Opvolging":"cat-5","ScanAmbassador":"cat-6","AppTester":"cat-7" };
+const CAT_CLASSES = { "KoudContact":"cat-1","Netwerk":"cat-2","WarmeLead":"cat-3","NaEvent":"cat-4","Opvolging":"cat-5","ScanAmbassador":"cat-6","AppTester":"cat-7","Persoonlijk":"cat-8" };
 
 // ===== DEFAULT TEMPLATES =====
 const DEFAULT_TEMPLATES = {
@@ -881,7 +882,7 @@ function renderStats() {
   const bar = document.getElementById('statsBar');
   const cats = {};
   allProspects.forEach(p => { if (p.categorie) cats[p.categorie] = (cats[p.categorie]||0)+1; });
-  const colors = {"KoudContact":"#c0392b","Netwerk":"#1a6fa0","WarmeLead":"#1a7a4a","NaEvent":"#b07a10","Opvolging":"#6a2ab0","ScanAmbassador":"#0a7a6a","AppTester":"#b04010"};
+  const colors = {"KoudContact":"#c0392b","Netwerk":"#1a6fa0","WarmeLead":"#1a7a4a","NaEvent":"#b07a10","Opvolging":"#6a2ab0","ScanAmbassador":"#0a7a6a","AppTester":"#b04010","Persoonlijk":"#9d1c6b"};
   let html = `<div class="stat-chip"><span class="dot" style="background:var(--navy)"></span>${allProspects.length} prospects</div>`;
   html += `<div class="stat-chip"><span class="dot" style="background:var(--green)"></span>${allProspects.filter(p=>p.valid).length} volledig</div>`;
   Object.entries(cats).forEach(([k,v]) => html += `<div class="stat-chip"><span class="dot" style="background:${colors[k]||'#999'}"></span>${k}: ${v}</div>`);
@@ -937,7 +938,7 @@ function renderTable() {
       <td onclick="event.stopPropagation()">
         <select onchange="updateField(${p.rowNum},'categorie',this.value)" style="border:none;background:transparent;font-size:12px;cursor:pointer;font-family:inherit;padding:2px 4px;border-radius:12px;" class="cat-badge ${cc}">
           <option value="">—</option>
-          ${['KoudContact','Netwerk','WarmeLead','NaEvent','Opvolging','ScanAmbassador','AppTester'].map(c => `<option value="${c}" ${p.categorie===c?'selected':''}>${c}</option>`).join('')}
+          ${['KoudContact','Netwerk','WarmeLead','NaEvent','Opvolging','ScanAmbassador','AppTester','Persoonlijk'].map(c => `<option value="${c}" ${p.categorie===c?'selected':''}>${c}</option>`).join('')}
         </select>
       </td>
       <td onclick="event.stopPropagation()">
