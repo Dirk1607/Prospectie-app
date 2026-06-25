@@ -214,7 +214,7 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
       </label>
       <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">Status
         <select id="mStatus" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;">
-          <option>Nog te contacteren</option><option>Verstuurd</option><option>Opgevolgd</option>
+          <option>Nog te contacteren</option><option>Verstuurd</option><option>Scan ingevuld</option>
         </select>
       </label>
       <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">Notities
@@ -235,16 +235,6 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
 
   <!-- TOOLBAR -->
   <div class="toolbar" id="toolbar" style="display:none">
-    <input type="text" class="search-box" id="searchBox" placeholder="Zoek op naam, bedrijf, e-mail...">
-    <select class="filter" id="catFilter">
-      <option value="">Alle categorieën</option>
-      <option>KoudContact</option><option>Netwerk</option><option>WarmeLead</option>
-      <option>NaEvent</option><option>Opvolging</option><option>ScanAmbassador</option><option>AppTester</option>
-    </select>
-    <select class="filter" id="statusFilter">
-      <option value="">Alle statussen</option>
-      <option>Nog te contacteren</option><option>Verstuurd</option><option>Opgevolgd</option>
-    </select>
     <button class="btn btn-ghost" onclick="selectAll()">Alles selecteren</button>
     <button class="btn btn-ghost" onclick="deselectAll()">Deselecteren</button>
     <button class="btn btn-danger" onclick="deleteSelected()">🗑️ Verwijder selectie</button>
@@ -279,7 +269,19 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
       <thead>
         <tr>
           <th><input type="checkbox" id="masterCheck" onchange="toggleAll(this)"></th>
-          <th>Naam</th><th>Bedrijf</th><th>E-mail</th><th>Categorie</th><th>Status</th><th>Notities</th><th style="width:40px"></th>
+          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">Naam<input type="text" id="fNaam" placeholder="🔍 zoek..." oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%"></div></th>
+          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">Bedrijf<input type="text" id="fBedrijf" placeholder="🔍 zoek..." oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%"></div></th>
+          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">E-mail<input type="text" id="fEmail" placeholder="🔍 zoek..." oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%"></div></th>
+          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">Categorie<select id="fCategorie" onchange="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%">
+            <option value="">Alle</option>
+            <option>KoudContact</option><option>Netwerk</option><option>WarmeLead</option><option>NaEvent</option><option>Opvolging</option><option>ScanAmbassador</option><option>AppTester</option>
+          </select></div></th>
+          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">Status<select id="fStatus" onchange="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%">
+            <option value="">Alle</option>
+            <option>Nog te contacteren</option><option>Verstuurd</option><option>Scan ingevuld</option>
+          </select></div></th>
+          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">Notities<input type="text" id="fNotities" placeholder="🔍 zoek..." oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%"></div></th>
+          <th style="width:40px"></th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
@@ -887,12 +889,17 @@ function renderStats() {
 }
 
 function renderTable() {
-  const search = document.getElementById('searchBox').value.toLowerCase();
-  const cat = document.getElementById('catFilter').value;
-  const status = document.getElementById('statusFilter').value;
+  const fNaam = document.getElementById('fNaam').value.toLowerCase();
+  const fBedrijf = document.getElementById('fBedrijf').value.toLowerCase();
+  const fEmail = document.getElementById('fEmail').value.toLowerCase();
+  const fNotities = document.getElementById('fNotities').value.toLowerCase();
+  const cat = document.getElementById('fCategorie').value;
+  const status = document.getElementById('fStatus').value;
   filtered = allProspects.filter(p => {
-    const text = `${p.voornaam} ${p.naam} ${p.email} ${p.bedrijf}`.toLowerCase();
-    if (search && !text.includes(search)) return false;
+    if (fNaam && !`${p.voornaam} ${p.naam}`.toLowerCase().includes(fNaam)) return false;
+    if (fBedrijf && !(p.bedrijf||'').toLowerCase().includes(fBedrijf)) return false;
+    if (fEmail && !(p.email||'').toLowerCase().includes(fEmail)) return false;
+    if (fNotities && !(p.notities||'').toLowerCase().includes(fNotities)) return false;
     if (cat && p.categorie !== cat) return false;
     if (status && p.status !== status) return false;
     return true;
@@ -936,7 +943,7 @@ function renderTable() {
       <td onclick="event.stopPropagation()">
         <select onchange="updateField(${p.rowNum},'status',this.value)" style="border:none;background:transparent;font-size:12px;cursor:pointer;font-family:inherit;padding:2px;">
           <option value="">—</option>
-          ${['Nog te contacteren','Verstuurd','Opgevolgd'].map(s => `<option value="${s}" ${p.status===s?'selected':''}>${s}</option>`).join('')}
+          ${['Nog te contacteren','Verstuurd','Scan ingevuld'].map(s => `<option value="${s}" ${p.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
       </td>
       <td onclick="event.stopPropagation()">
@@ -1173,9 +1180,7 @@ function saveApiKey() {
 }
 
 // FILTERS
-document.getElementById('searchBox').addEventListener('input', renderTable);
-document.getElementById('catFilter').addEventListener('change', renderTable);
-document.getElementById('statusFilter').addEventListener('change', renderTable);
+// Filters reageren via inline oninput/onchange in de kolomkoppen (zie tabel-header)
 </script>
 </body>
 </html>
