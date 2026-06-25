@@ -166,22 +166,6 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="loginOverlay" style="display:flex;position:fixed;inset:0;z-index:9999;background:var(--navy);align-items:center;justify-content:center;">
-  <form onsubmit="doLogin(event)" style="background:white;border-radius:14px;padding:32px 36px;width:340px;max-width:90vw;box-shadow:0 10px 40px rgba(0,0,0,.3);">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
-      <div class="logo-badge">TNL</div>
-      <div><h1 style="color:var(--navy);font-size:18px;">Prospectie App</h1><p style="color:var(--muted);font-size:12px;">Log in om verder te gaan</p></div>
-    </div>
-    <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px;">E-mail</label>
-    <input id="loginEmail" type="email" autocomplete="username" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;margin-bottom:12px;">
-    <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px;">Wachtwoord</label>
-    <input id="loginPassword" type="password" autocomplete="current-password" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;margin-bottom:16px;">
-    <button id="loginBtn" type="submit" class="btn-upload" style="width:100%;padding:11px;font-size:14px;">Inloggen</button>
-    <p id="loginError" style="color:var(--red);font-size:12px;margin-top:10px;min-height:16px;"></p>
-  </form>
-</div>
-
 <div id="stickyHeaderWrap" style="position:sticky;top:0;z-index:100;background:var(--light);">
 <header>
   <div class="logo-badge">TNL</div>
@@ -190,7 +174,6 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
     <p>The Next Level — Metroplan Quick Scan uitnodigingen</p>
   </div>
   <button onclick="showApiKeyModal()" style="margin-left:auto;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;" title="API-sleutel instellen">🔑 API-sleutel</button>
-  <button onclick="doLogout()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;margin-left:8px;" title="Uitloggen">⎋ Uitloggen</button>
 </header>
 
 <div class="tab-bar">
@@ -1156,39 +1139,9 @@ async function resetTemplate() {
 // Load initial settings view
 switchSettingsTab('KoudContact', document.querySelector('.settings-nav-item'));
 
-// ===== AUTH: de app laadt z'n data pas na inloggen =====
-function initAppData() {
-  loadProspectsFromSupabase();
-  loadTemplatesFromSupabase();
-}
-async function checkAuth() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    document.getElementById('loginOverlay').style.display = 'none';
-    initAppData();
-  } else {
-    document.getElementById('loginOverlay').style.display = 'flex';
-  }
-}
-async function doLogin(e) {
-  if (e) e.preventDefault();
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  const errEl = document.getElementById('loginError');
-  const btn = document.getElementById('loginBtn');
-  errEl.textContent = '';
-  btn.disabled = true; btn.textContent = 'Bezig...';
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  btn.disabled = false; btn.textContent = 'Inloggen';
-  if (error) { errEl.textContent = 'Inloggen mislukt. Controleer e-mail en wachtwoord.'; return; }
-  document.getElementById('loginOverlay').style.display = 'none';
-  initAppData();
-}
-async function doLogout() {
-  await sb.auth.signOut();
-  location.reload();
-}
-checkAuth();
+// Laad prospects en templates vanuit Supabase bij opstarten
+loadProspectsFromSupabase();
+loadTemplatesFromSupabase();
 
 // Tabelheader + actiebalk sticky houden net onder de volledige sticky kop (header+tabs+upload+stats+zoekbalk)
 function updateStickyTheadOffset() {
