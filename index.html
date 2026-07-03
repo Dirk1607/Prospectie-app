@@ -738,6 +738,10 @@ pasteZone.addEventListener('focus', () => pasteZone.classList.add('active'));
 pasteZone.addEventListener('blur', () => pasteZone.classList.remove('active'));
 
 document.addEventListener('paste', async (e) => {
+  // Plakken in een invoerveld (mailtekst, zoekvelden, CAT-velden, …) is voor dat veld bedoeld,
+  // niet voor het importeren van prospects. Enkel plakken op de kale pagina / plak-zone importeert.
+  const t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
   const items = e.clipboardData.items;
   for (const item of items) {
     if (item.type.startsWith('image/')) {
@@ -774,6 +778,8 @@ function rowsToProspectData(rows) {
     else if (h.includes('datum') || h.includes('date')) colMap.datum = i;
     else if (h.includes('status')) colMap.status = i;
   });
+  // Geen enkele naam-/e-mailkolom herkend? Dan is dit geen prospect-tabel (bv. geplakte mailtekst) -> niet importeren.
+  if (colMap.email === undefined && colMap.naam === undefined && colMap.voornaam === undefined) return null;
   const dataRows = [];
   for (let i = 1; i < rows.length; i++) {
     const r = rows[i];
@@ -894,6 +900,8 @@ async function processProspectRows(rows, source) {
       status: String(r.status || 'Nog te contacteren').trim(),
       valid: true
     };
+    // Vangnet: een rij zonder voornaam, naam én e-mail is leeg -> nooit opslaan.
+    if (!p.voornaam && !p.naam && !p.email) return;
     const missing = [];
     if (!p.voornaam) missing.push('Voornaam');
     if (!p.naam) missing.push('Naam');
