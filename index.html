@@ -1241,16 +1241,11 @@ function applyTemplate(p, cat) {
   document.getElementById('mailHint').textContent = tpl.hints || '';
 }
 
-async function reloadTemplate() {
+function reloadTemplate() {
   const p = mailProspects[mailIdx];
   if (!p) return;
-  const nieuweCat = document.getElementById('mailCatSelect').value;
-  applyTemplate(p, nieuweCat);
-  if (p.categorie !== nieuweCat) {
-    await updateField(p.rowNum, 'categorie', nieuweCat);
-    p.categorie = nieuweCat;
-    renderProspectList();
-  }
+  // Sjabloonkeuze is enkel voor deze mail; NIET wegschrijven naar CAT 1 (categorie).
+  applyTemplate(p, document.getElementById('mailCatSelect').value);
 }
 
 function navProspect(dir) {
