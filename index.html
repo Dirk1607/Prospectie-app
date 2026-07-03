@@ -166,6 +166,24 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
 @media (max-width: 900px) {
   .mail-workspace, .settings-grid { grid-template-columns: 1fr; }
 }
+/* Compact invoerformulier "Prospect handmatig toevoegen" */
+#manualAdd { padding: 9px 14px !important; margin-bottom: 12px !important; }
+#manualAdd h3 { font-size: 13px !important; margin-bottom: 7px !important; }
+#manualAdd > div { gap: 7px !important; }
+#manualAdd label { gap: 1px !important; font-size: 10px !important; }
+#manualAdd input, #manualAdd select { padding: 4px 7px !important; font-size: 12px !important; border-radius: 6px !important; border-width: 1px !important; }
+#manualAdd .btn-upload { padding: 6px 14px !important; font-size: 12px !important; }
+#manualAdd p { margin-top: 6px !important; font-size: 10px !important; }
+#mVoornaam, #mNaam { width: 90px !important; }
+#mEmail { width: 160px !important; }
+#mTelefoon { width: 100px !important; }
+#mBedrijf { width: 115px !important; }
+#mNotities { width: 125px !important; }
+/* Sorteerbare kolomkoppen */
+.sort-h { cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 4px; }
+.sort-h:hover { text-decoration: underline; }
+.sort-h .arr { font-size: 9px; opacity: .45; }
+.sort-h.active .arr { opacity: 1; color: #fff; }
 </style>
 </head>
 <body>
@@ -211,19 +229,16 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
       <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">Bedrijf
         <input id="mBedrijf" type="text" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;width:140px;">
       </label>
-      <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">Categorie
-        <select id="mCategorie" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;">
-          <option value="">(geen)</option>
-          <option>KoudContact</option><option>Netwerk</option><option>WarmeLead</option><option>NaEvent</option><option>Opvolging</option><option>ScanAmbassador</option><option>AppTester</option><option>Persoonlijk</option>
-        </select>
-      </label>
       <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">Status
         <select id="mStatus" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;">
           <option>Nog te contacteren</option><option>Quickscan verstuurd</option><option>Quickscan ingevuld</option>
         </select>
       </label>
-      <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">Notities
-        <input id="mNotities" type="text" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;width:160px;">
+      <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">CAT 1
+        <input id="mCategorie" list="cat1-list" type="text" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;width:130px;">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);">CAT 2
+        <input id="mNotities" list="cat2-list" type="text" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;width:160px;">
       </label>
       <button class="btn-upload" onclick="addManualContact()" style="padding:10px 20px;">➕ Toevoegen</button>
     </div>
@@ -268,25 +283,32 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
     </div>
   </div>
 
+  <!-- Keuzelijsten voor CAT 1 / CAT 2 (typen of kiezen; nieuwe waarden komen er vanzelf bij) -->
+  <datalist id="cat1-list"></datalist>
+  <datalist id="cat2-list"></datalist>
+
   <!-- TABLE -->
   <div class="table-wrap" id="tableWrap" style="display:none">
     <table>
       <thead>
         <tr>
           <th><input type="checkbox" id="masterCheck" onchange="toggleAll(this)"></th>
-          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">Naam<input type="text" id="fNaam" placeholder="🔍 zoek..." oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%"></div></th>
-          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">Bedrijf<input type="text" id="fBedrijf" placeholder="🔍 zoek..." oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%"></div></th>
-          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">E-mail<input type="text" id="fEmail" placeholder="🔍 zoek..." oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%"></div></th>
-          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">Telefoon<input type="text" id="fTelefoon" placeholder="🔍 zoek..." oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%"></div></th>
-          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">Categorie<select id="fCategorie" onchange="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%">
-            <option value="">Alle</option>
-            <option>KoudContact</option><option>Netwerk</option><option>WarmeLead</option><option>NaEvent</option><option>Opvolging</option><option>ScanAmbassador</option><option>AppTester</option><option>Persoonlijk</option>
-          </select></div></th>
-          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">Status<select id="fStatus" onchange="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%">
+          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch"><div style="display:flex;gap:4px">
+            <span class="sort-h" style="width:50%" data-sf="voornaam" onclick="setSort('voornaam')">Voornaam<span class="arr">↕</span></span>
+            <span class="sort-h" style="width:50%" data-sf="naam" onclick="setSort('naam')">Achternaam<span class="arr">↕</span></span>
+          </div><div style="display:flex;gap:4px">
+            <input type="text" id="fVoornaam" placeholder="🔍 voornaam" oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:50%;min-width:0">
+            <input type="text" id="fAchternaam" placeholder="🔍 achternaam" oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:50%;min-width:0">
+          </div></div></th>
+          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch"><span class="sort-h" data-sf="bedrijf" onclick="setSort('bedrijf')">Bedrijf<span class="arr">↕</span></span><input type="text" id="fBedrijf" placeholder="🔍 zoek..." oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%"></div></th>
+          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch"><span class="sort-h" data-sf="email" onclick="setSort('email')">E-mail<span class="arr">↕</span></span><input type="text" id="fEmail" placeholder="🔍 zoek..." oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%"></div></th>
+          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch"><span class="sort-h" data-sf="telefoon" onclick="setSort('telefoon')">Telefoon<span class="arr">↕</span></span><input type="text" id="fTelefoon" placeholder="🔍 zoek..." oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%"></div></th>
+          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch"><span class="sort-h" data-sf="status" onclick="setSort('status')">Status<span class="arr">↕</span></span><select id="fStatus" onchange="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%">
             <option value="">Alle</option>
             <option>Nog te contacteren</option><option>Quickscan verstuurd</option><option>Quickscan ingevuld</option>
           </select></div></th>
-          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch">Notities<input type="text" id="fNotities" placeholder="🔍 zoek..." oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%"></div></th>
+          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch"><span class="sort-h" data-sf="cat1" onclick="setSort('cat1')">CAT 1<span class="arr">↕</span></span><input type="text" id="fCat1" placeholder="🔍 zoek..." oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%"></div></th>
+          <th><div style="display:flex;flex-direction:column;gap:5px;align-items:stretch"><span class="sort-h" data-sf="cat2" onclick="setSort('cat2')">CAT 2<span class="arr">↕</span></span><input type="text" id="fCat2" placeholder="🔍 zoek..." oninput="renderTable()" style="font-weight:400;border:1px solid var(--border);border-radius:5px;padding:3px 6px;font-size:11px;width:100%"></div></th>
           <th style="width:72px"></th>
         </tr>
       </thead>
@@ -926,24 +948,77 @@ function renderStats() {
   bar.innerHTML = html;
 }
 
+// Keuzelijsten voor CAT 1 / CAT 2 opbouwen uit de bestaande data.
+// CAT 1 start met een vaste basislijst; nieuw ingetypte waarden komen er (na opslaan) vanzelf bij.
+const CAT1_SEED = ['Kennissen', 'Klant', 'Netwerk', 'Vrienden'];
+function buildCatLists() {
+  const set1 = new Set(CAT1_SEED);
+  const set2 = new Set();
+  allProspects.forEach(p => {
+    const c1 = (p.categorie || '').trim(); if (c1) set1.add(c1);
+    const c2 = (p.notities || '').trim(); if (c2) set2.add(c2);
+  });
+  const opts = (set) => [...set].sort((a, b) => a.localeCompare(b, 'nl')).map(v => `<option value="${v.replace(/"/g, '&quot;')}">`).join('');
+  const d1 = document.getElementById('cat1-list'); if (d1) d1.innerHTML = opts(set1);
+  const d2 = document.getElementById('cat2-list'); if (d2) d2.innerHTML = opts(set2);
+}
+
+// ----- Sorteren op kolomkop -----
+let sortField = null, sortDir = 1;   // 1 = oplopend, -1 = aflopend
+const SORT_KEYS = {
+  voornaam: p => `${p.voornaam||''} ${p.naam||''}`,
+  naam:     p => `${p.naam||''} ${p.voornaam||''}`,
+  bedrijf:  p => p.bedrijf || '',
+  email:    p => p.email || '',
+  telefoon: p => p.telefoon || '',
+  status:   p => p.status || '',
+  cat1:     p => p.categorie || '',
+  cat2:     p => p.notities || ''
+};
+function setSort(field) {
+  if (sortField === field) sortDir = -sortDir; else { sortField = field; sortDir = 1; }
+  renderTable();
+}
+function updateSortIndicators() {
+  document.querySelectorAll('.sort-h').forEach(el => {
+    const active = el.dataset.sf === sortField;
+    el.classList.toggle('active', active);
+    const arr = el.querySelector('.arr');
+    if (arr) arr.textContent = active ? (sortDir === 1 ? '▲' : '▼') : '↕';
+  });
+}
+
 function renderTable() {
-  const fNaam = document.getElementById('fNaam').value.toLowerCase();
+  buildCatLists();
+  const fVoornaam = document.getElementById('fVoornaam').value.toLowerCase();
+  const fAchternaam = document.getElementById('fAchternaam').value.toLowerCase();
   const fBedrijf = document.getElementById('fBedrijf').value.toLowerCase();
   const fEmail = document.getElementById('fEmail').value.toLowerCase();
   const fTelefoon = document.getElementById('fTelefoon').value.toLowerCase();
-  const fNotities = document.getElementById('fNotities').value.toLowerCase();
-  const cat = document.getElementById('fCategorie').value;
+  const fCat1 = document.getElementById('fCat1').value.toLowerCase();
+  const fCat2 = document.getElementById('fCat2').value.toLowerCase();
   const status = document.getElementById('fStatus').value;
   filtered = allProspects.filter(p => {
-    if (fNaam && !`${p.voornaam} ${p.naam}`.toLowerCase().includes(fNaam)) return false;
+    if (fVoornaam && !(p.voornaam||'').toLowerCase().includes(fVoornaam)) return false;
+    if (fAchternaam && !(p.naam||'').toLowerCase().includes(fAchternaam)) return false;
     if (fBedrijf && !(p.bedrijf||'').toLowerCase().includes(fBedrijf)) return false;
     if (fEmail && !(p.email||'').toLowerCase().includes(fEmail)) return false;
     if (fTelefoon && !(p.telefoon||'').toLowerCase().includes(fTelefoon)) return false;
-    if (fNotities && !(p.notities||'').toLowerCase().includes(fNotities)) return false;
-    if (cat && p.categorie !== cat) return false;
+    if (fCat1 && !(p.categorie||'').toLowerCase().includes(fCat1)) return false;
+    if (fCat2 && !(p.notities||'').toLowerCase().includes(fCat2)) return false;
     if (status && p.status !== status) return false;
     return true;
   });
+  if (sortField && SORT_KEYS[sortField]) {
+    const kf = SORT_KEYS[sortField];
+    filtered.sort((a, b) => {
+      const av = kf(a).trim().toLowerCase(), bv = kf(b).trim().toLowerCase();
+      if (!av && !bv) return 0;
+      if (!av) return 1; if (!bv) return -1;   // lege waarden altijd achteraan
+      return av.localeCompare(bv, 'nl', { numeric: true }) * sortDir;
+    });
+  }
+  updateSortIndicators();
   const tbody = document.getElementById('tableBody');
   if (filtered.length === 0) {
     tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">🔍 Geen prospects gevonden.</div></td></tr>`;
@@ -951,14 +1026,13 @@ function renderTable() {
   }
   tbody.innerHTML = filtered.map(p => {
     const sel = selectedIndices.has(p.rowNum);
-    const cc = CAT_CLASSES[p.categorie] || '';
     const naam = p.valid
       ? `<strong>${p.voornaam} ${p.naam}</strong><span style="color:var(--muted);font-size:11px"> (${p.titel||'?'})</span>`
       : `<strong>${p.voornaam||'?'} ${p.naam||'?'}</strong> <span class="missing">⚠ ${p.missingFields.join(', ')}</span>`;
     return `<tr class="${sel?'selected':''}" onclick="toggleRow(${p.rowNum},event)">
       <td style="text-align:center"><input type="checkbox" ${sel?'checked':''} ${!p.valid?'disabled':''} onclick="toggleRow(${p.rowNum},event);event.stopPropagation()"></td>
       <td onclick="event.stopPropagation()">
-        <div style="display:flex;gap:4px;flex-wrap:wrap">
+        <div style="display:flex;gap:4px;flex-wrap:nowrap;align-items:center">
           <select onchange="updateField(${p.rowNum},'titel',this.value)" style="width:58px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:11px;color:var(--muted)" title="Aanspreektitel">
             <option value="" ${!p.titel?'selected':''}>?</option>
             <option value="Dhr." ${p.titel==='Dhr.'?'selected':''}>Dhr.</option>
@@ -978,19 +1052,16 @@ function renderTable() {
         <input value="${p.telefoon||''}" onchange="updateField(${p.rowNum},'telefoon',this.value)" style="width:110px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:12px" title="Telefoon" placeholder="telefoon...">
       </td>
       <td onclick="event.stopPropagation()">
-        <select onchange="updateField(${p.rowNum},'categorie',this.value)" style="border:none;background:transparent;font-size:12px;cursor:pointer;font-family:inherit;padding:2px 4px;border-radius:12px;" class="cat-badge ${cc}">
-          <option value="">—</option>
-          ${['KoudContact','Netwerk','WarmeLead','NaEvent','Opvolging','ScanAmbassador','AppTester','Persoonlijk'].map(c => `<option value="${c}" ${p.categorie===c?'selected':''}>${c}</option>`).join('')}
-        </select>
-      </td>
-      <td onclick="event.stopPropagation()">
         <select onchange="updateField(${p.rowNum},'status',this.value)" style="border:none;background:transparent;font-size:12px;cursor:pointer;font-family:inherit;padding:2px;">
           <option value="">—</option>
           ${['Nog te contacteren','Quickscan verstuurd','Quickscan ingevuld'].map(s => `<option value="${s}" ${p.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
       </td>
       <td onclick="event.stopPropagation()">
-        <input value="${p.notities||''}" onchange="updateField(${p.rowNum},'notities',this.value)" style="width:120px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:11px;color:var(--muted)" title="Notities" placeholder="notities...">
+        <input list="cat1-list" value="${p.categorie||''}" onchange="updateField(${p.rowNum},'categorie',this.value)" style="width:110px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:12px" title="CAT 1" placeholder="cat 1...">
+      </td>
+      <td onclick="event.stopPropagation()">
+        <input list="cat2-list" value="${p.notities||''}" onchange="updateField(${p.rowNum},'notities',this.value)" style="width:120px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:11px;color:var(--muted)" title="CAT 2" placeholder="cat 2...">
       </td>
       <td style="white-space:nowrap"><button onclick="openDetail(${p.rowNum},event)" style="background:none;border:none;cursor:pointer;font-size:15px;color:${(p.verloop||p.volgende_stap||p.samenvatting)?'var(--orange)':'#bbb'}" title="Opvolging / notities">📝</button> <button onclick="deleteProspect(${p.rowNum},event)" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:15px" title="Verwijder">🗑️</button></td>
     </tr>`;
