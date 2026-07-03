@@ -15,15 +15,18 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); color: var(--text); min-height: 100vh; }
 
-/* HEADER */
-header { background: var(--navy); padding: 14px 28px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 12px rgba(27,58,107,0.2); }
-.logo-badge { width: 42px; height: 42px; background: var(--orange); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; font-size: 17px; }
-header h1 { color: white; font-size: 19px; font-weight: 700; }
-header p { color: rgba(255,255,255,0.55); font-size: 12px; }
+/* HEADER (één-balk-banner: logo + titel gecentreerd, rechts API-sleutel boven + tabs onder) */
+header { background: var(--navy); color:#fff; padding: 0 28px; min-height:108px; display: flex; align-items: center; gap: 22px; box-shadow: 0 2px 12px rgba(27,58,107,0.2); }
+.logo-badge { background: #fff; border-radius: 9px; padding: 3px 10px; display: flex; align-items: center; }
+.logo-badge img { height: 54px; width: auto; display: block; }
+header h1 { color: white; font-size: 22px; font-weight: 700; margin:0; white-space:nowrap; }
+header h1 .ver { font-size:14px; font-weight:600; opacity:.7; }
+.header-right { margin-left:auto; align-self:stretch; display:flex; flex-direction:column; align-items:flex-end; justify-content:space-between; padding:12px 0 0; }
+.apikey-btn { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:white; border-radius:8px; padding:7px 14px; font-size:12px; cursor:pointer; }
 
 /* TABS */
-.tab-bar { background: var(--navy); padding: 0 28px; display: flex; gap: 4px; border-top: 1px solid rgba(255,255,255,0.1); }
-.tab-btn { padding: 10px 22px; color: rgba(255,255,255,0.55); font-size: 14px; font-weight: 600; cursor: pointer; border: none; background: none; border-bottom: 3px solid transparent; transition: all 0.2s; }
+.tab-bar { display: flex; align-items:flex-end; gap: 28px; }
+.tab-btn { padding: 0 2px 12px; color: rgba(255,255,255,0.55); font-size: 14px; font-weight: 600; cursor: pointer; border: none; background: none; border-bottom: 3px solid transparent; transition: all 0.2s; }
 .tab-btn:hover { color: white; }
 .tab-btn.active { color: white; border-bottom-color: var(--orange); }
 .tab-panel { display: none; }
@@ -100,7 +103,7 @@ tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; 
 tbody tr:hover { background: #f0f5ff; }
 tbody tr.selected { background: #e8f0fd; }
 tbody td { padding: 3px 11px; font-size: 13px; vertical-align: middle; }
-/* Werklijst: velden zonder kadertjes — vlakke tekst die je toch kan bewerken */
+/* Werklijst: velden zonder kadertjes, vlakke tekst die je toch kan bewerken */
 tbody td input[type=text], tbody td input:not([type]), tbody td select { border: none !important; background: transparent !important; border-radius: 0 !important; }
 tbody td input[type=text]:hover, tbody td input:not([type]):hover, tbody td select:hover { background: #eef4ff !important; }
 tbody td input[type=text]:focus, tbody td input:not([type]):focus, tbody td select:focus { background: #fff !important; box-shadow: inset 0 -1.5px 0 var(--blue); }
@@ -190,19 +193,19 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
 
 <div id="stickyHeaderWrap" style="position:sticky;top:0;z-index:100;background:var(--light);">
 <header>
-  <div class="logo-badge">TNL</div>
+  <div class="logo-badge"><img src="LogoNextLevel_FINAAL.jpg" alt="The Next Level"></div>
   <div>
-    <h1>Prospectie App <span style="font-size:13px;font-weight:600;opacity:.7">v1.0</span></h1>
-    <p>The Next Level — Metroplan Quick Scan uitnodigingen</p>
+    <h1>Prospectie App <span class="ver">v1.2</span></h1>
   </div>
-  <button onclick="showApiKeyModal()" style="margin-left:auto;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;" title="API-sleutel instellen">🔑 API-sleutel</button>
+  <div class="header-right">
+    <button class="apikey-btn" onclick="showApiKeyModal()" title="API-sleutel instellen">🔑 API-sleutel</button>
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('prospects')">Prospects</button>
+      <button class="tab-btn" onclick="switchTab('mails')">Mails</button>
+      <button class="tab-btn" onclick="switchTab('instellingen')">Instellingen</button>
+    </div>
+  </div>
 </header>
-
-<div class="tab-bar">
-  <button class="tab-btn active" onclick="switchTab('prospects')">👥 Prospects</button>
-  <button class="tab-btn" onclick="switchTab('mails')">✉️ Mails</button>
-  <button class="tab-btn" onclick="switchTab('instellingen')">⚙️ Instellingen</button>
-</div>
 
 <div id="prospectsStickyContent" style="max-width:1300px;margin:0 auto;padding:24px 24px 16px;">
   <!-- UPLOAD -->
@@ -362,7 +365,7 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
         <button class="btn btn-primary" onclick="saveOutlookConcept()">📬 Open in Outlook (web)</button>
       </div>
       <div class="outlook-tip" id="outlookTip" style="display:none;margin-top:12px;padding:10px 14px;background:#e8f4fd;border-left:3px solid var(--blue);border-radius:6px;font-size:13px;color:#1a4a7a;">
-        📬 Outlook Web geopend in een nieuw tabblad. Klik op <strong>Verzenden</strong> om te versturen, of sluit het tabblad gewoon — Outlook Web slaat de mail automatisch op als concept.
+        📬 Outlook Web geopend in een nieuw tabblad. Klik op <strong>Verzenden</strong> om te versturen, of sluit het tabblad gewoon. Outlook Web slaat de mail automatisch op als concept.
       </div>
     </div>
   </div>
@@ -447,7 +450,7 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
       <label style="font-size:12px;color:var(--muted);">AI-samenvatting (waar staan we?)</label>
       <button id="dSamenvatBtn" onclick="summarizeProspect()" class="btn-upload" style="padding:7px 14px;background:var(--purple);">🤖 Vat samen</button>
     </div>
-    <div id="dSamenvatting" style="border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.6;background:var(--light);white-space:pre-wrap;min-height:60px;color:var(--text);">—</div>
+    <div id="dSamenvatting" style="border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.6;background:var(--light);white-space:pre-wrap;min-height:60px;color:var(--text);">-</div>
   </div>
 </div>
 
@@ -467,11 +470,11 @@ const DEFAULT_TEMPLATES = {
     subject: `Hoe gezond is uw organisatie écht?`,
     body: `Geachte [TITEL_FORMEEL] [NAAM]
 
-Ik ben Dirk Vander Eyken, founder van The Next Level. Wij helpen Vlaamse KMO's groeien zonder chaos — via onze methodologie die snel in kaart brengt waar een organisatie groei, marge of structuur laat liggen.
+Ik ben Dirk Vander Eyken, founder van The Next Level. Wij helpen Vlaamse KMO's groeien zonder chaos, via onze methodologie die snel in kaart brengt waar een organisatie groei, marge of structuur laat liggen.
 
-We hebben daarvoor een gratis online tool ontwikkeld: de Quick Scan. In minder dan 10 minuten krijgt u een visueel beeld van de sterktes en werkpunten van uw bedrijf — zonder verplichtingen.
+We hebben daarvoor een gratis online tool ontwikkeld: de Quick Scan. In minder dan 10 minuten krijgt u een visueel beeld van de sterktes en werkpunten van uw bedrijf, zonder verplichtingen.
 
-P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail — ik neem het vanaf daar over.
+P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail, ik neem het vanaf daar over.
 
 Interesse? U vindt de scan hier:
 https://quickscan.thenextlevel.consulting
@@ -487,11 +490,11 @@ Dirk`,
 
 We kennen elkaar al even, maar ik wilde je even iets doorsturen waar jij misschien iets aan hebt.
 
-We hebben bij The Next Level een gratis Quick Scan ontwikkeld waarmee zaakvoerders in 10 minuten een eerlijk beeld krijgen van hoe hun organisatie er écht voor staat — op vlak van strategie, finance, sales, HR, operations en meer.
+We hebben bij The Next Level een gratis Quick Scan ontwikkeld waarmee zaakvoerders in 10 minuten een eerlijk beeld krijgen van hoe hun organisatie er écht voor staat, op vlak van strategie, finance, sales, HR, operations en meer.
 
 [✏️ OPTIONEEL: Ik dacht aan jou omdat ...]
 
-P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail — ik neem het vanaf daar over.
+P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail, ik neem het vanaf daar over.
 
 Geen verkooppraatje, gewoon een nuttige oefening. Hier is de link:
 https://quickscan.thenextlevel.consulting
@@ -511,7 +514,7 @@ Goed dat we elkaar recent konden spreken. Zoals beloofd stuur ik je de link naar
 
 In 10 minuten krijg je een visueel overzicht: waar staat jouw organisatie sterk en waar zitten de grootste groeikansen? Daarna plannen we eventueel een kort gesprek om de resultaten samen te bekijken.
 
-P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail — ik neem het vanaf daar over.
+P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail, ik neem het vanaf daar over.
 
 Hier is de link:
 https://quickscan.thenextlevel.consulting
@@ -527,9 +530,9 @@ Dirk`,
 
 Fijn dat we elkaar kort konden spreken. [✏️ Vul aan: op/bij ...]
 
-Onze Metroplan Quick Scan is een gratis tool die zaakvoerders in 10 minuten een eerlijk beeld geeft van hun organisatie. Helemaal vrijblijvend — maar altijd verhelderend.
+Onze Metroplan Quick Scan is een gratis tool die zaakvoerders in 10 minuten een eerlijk beeld geeft van hun organisatie. Helemaal vrijblijvend, maar altijd verhelderend.
 
-P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail — ik neem het vanaf daar over.
+P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail, ik neem het vanaf daar over.
 
 https://quickscan.thenextlevel.consulting
 
@@ -548,7 +551,7 @@ We hadden elkaar al eens gesproken. [✏️ Vul aan: over ... / De timing was to
 
 Ik stuur je graag onze gratis online tool Quick Scan door. Misschien kan je er business inzichten uit halen. Veel zaakvoerders vinden het een nuttige manier om even een stap hoger te zetten en in helikopterview naar hun organisatie te kijken.
 
-P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail — ik neem het vanaf daar over.
+P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail, ik neem het vanaf daar over.
 
 https://quickscan.thenextlevel.consulting
 
@@ -563,7 +566,7 @@ Dirk`,
     subject: `Mag ik jou iets vragen?`,
     body: `Dag [VOORNAAM]
 
-We hebben een online tool ontwikkeld — de Metroplan Quick Scan — en ik ben op zoek naar ervaren bedrijfsleiders die hem willen uittesten vóór ik hem breder uitrol.
+We hebben een online tool ontwikkeld, de Metroplan Quick Scan, en ik ben op zoek naar ervaren bedrijfsleiders die hem willen uittesten vóór ik hem breder uitrol.
 
 De test duurt 10 minuten. Organisaties krijgen er een eerlijk en visueel beeld van hoe hun organisatie er voor staat. Volledig gratis, geen verplichtingen. Vertrek vanuit jouw eigen rol en krijg "en passant" je eigen screening mee.
 
@@ -571,11 +574,11 @@ De test duurt 10 minuten. Organisaties krijgen er een eerlijk en visueel beeld v
 
 Jouw feedback zou voor mij bijzonder waardevol zijn om de tool verder te verfijnen. En hopelijk haal je er zelf ook enkele interessante inzichten uit 😊.
 
-P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail — ik neem het vanaf daar over.
+P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail, ik neem het vanaf daar over.
 
 Hier is de link: https://quickscan.thenextlevel.consulting
 
-Alvast bedankt — en zeg gerust wat je ervan vindt.
+Alvast bedankt, en zeg gerust wat je ervan vindt.
 
 Dirk`,
     hints: `✏️ Optioneel: pas de persoonlijke reden aan waarom je aan deze persoon dacht.`
@@ -584,7 +587,7 @@ Dirk`,
     subject: `Kan ik jou iets vragen?`,
     body: `Dag [VOORNAAM]
 
-Ik ben volop bezig met een digitale tool die ik gebruik om zaakvoerders uit te nodigen voor een gratis Quick Scan. De tool werkt — maar voor ik hem breder inzet, wil ik hem laten screenen door iemand die eerlijk durft zeggen wat voor verbetering vatbaar is (of zelfs niet klopt).
+Ik ben volop bezig met een digitale tool die ik gebruik om zaakvoerders uit te nodigen voor een gratis Quick Scan. De tool werkt, maar voor ik hem breder inzet, wil ik hem laten screenen door iemand die eerlijk durft zeggen wat voor verbetering vatbaar is (of zelfs niet klopt).
 
 Ik dacht meteen aan jou.
 
@@ -595,7 +598,7 @@ Concreet vraag ik je om de app door te lopen, een paar mails te genereren en me 
 
 Het kost je een halfuurtje. Jouw feedback gebruik ik om de tool verder te verfijnen. En misschien haal je er zelf ook enkele interessante inzichten uit 😊.
 
-P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail — ik neem het vanaf daar over.
+P.S. Ken je nog een ondernemer of manager voor wie deze Quick Scan ook nuttig zou zijn? Laat het me gewoon weten via een antwoord op deze mail, ik neem het vanaf daar over.
 
 Je vindt de app hier: https://quickscan.thenextlevel.consulting
 
@@ -613,7 +616,7 @@ async function loadTemplatesFromSupabase() {
   const { data, error } = await sb.from('templates').select('*');
   if (error) { console.error('Templates laden mislukt:', error.message); return; }
   if (!data || data.length === 0) {
-    // Tabel is leeg — vul ze eenmalig met de defaults
+    // Tabel is leeg, vul ze eenmalig met de defaults
     const rows = Object.keys(DEFAULT_TEMPLATES).map(cat => ({
       categorie: cat, subject: DEFAULT_TEMPLATES[cat].subject,
       body: DEFAULT_TEMPLATES[cat].body, hints: DEFAULT_TEMPLATES[cat].hints || ''
@@ -749,7 +752,7 @@ document.addEventListener('paste', async (e) => {
       if (file) { readImageFile(file); return; }
     }
   }
-  // Geen afbeelding op het klembord — probeer geplakte tabeltekst (bv. gekopieerd uit Excel)
+  // Geen afbeelding op het klembord, probeer geplakte tabeltekst (bv. gekopieerd uit Excel)
   const text = e.clipboardData.getData('text/plain');
   if (!text || !text.trim()) return;
   const lines = text.replace(/\r/g, '').split('\n').filter(l => l.length > 0);
@@ -911,7 +914,7 @@ async function processProspectRows(rows, source) {
 
     if (p.email && existingEmails.has(p.email.toLowerCase())) {
       const ex = existingEmails.get(p.email.toLowerCase());
-      duplicates.push(`${p.voornaam} ${p.naam} (${p.email}) — stond al in de lijst als ${ex.voornaam} ${ex.naam}`);
+      duplicates.push(`${p.voornaam} ${p.naam} (${p.email}), stond al in de lijst als ${ex.voornaam} ${ex.naam}`);
     } else {
       newProspects.push(p);
       if (p.email) existingEmails.set(p.email.toLowerCase(), p);
@@ -1061,7 +1064,7 @@ function renderTable() {
       </td>
       <td onclick="event.stopPropagation()">
         <select onchange="updateField(${p.rowNum},'status',this.value)" style="border:none;background:transparent;font-size:12px;cursor:pointer;font-family:inherit;padding:2px;">
-          <option value="">—</option>
+          <option value="">-</option>
           ${['Nog te contacteren','Quickscan verstuurd','Quickscan ingevuld'].map(s => `<option value="${s}" ${p.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
       </td>
@@ -1123,12 +1126,12 @@ function openDetail(rowNum, e) {
   const p = allProspects.find(x => x.rowNum === rowNum);
   if (!p) return;
   currentDetailRow = rowNum;
-  document.getElementById('detailTitle').textContent = 'Opvolging — ' + (p.voornaam||'') + ' ' + (p.naam||'') + (p.bedrijf ? ' ('+p.bedrijf+')' : '');
+  document.getElementById('detailTitle').textContent = 'Opvolging: ' + (p.voornaam||'') + ' ' + (p.naam||'') + (p.bedrijf ? ' ('+p.bedrijf+')' : '');
   document.getElementById('dVolgendeStap').value = p.volgende_stap || '';
   document.getElementById('dVolgendeStapDatum').value = p.volgende_stap_datum || '';
   document.getElementById('dVerloop').value = p.verloop || '';
   document.getElementById('dNieuweNotitie').value = '';
-  document.getElementById('dSamenvatting').textContent = p.samenvatting || '—';
+  document.getElementById('dSamenvatting').textContent = p.samenvatting || '-';
   document.getElementById('detailOverlay').style.display = 'flex';
 }
 function closeDetail() { document.getElementById('detailOverlay').style.display = 'none'; currentDetailRow = null; }
@@ -1362,7 +1365,7 @@ function showApiKeyModal() {
 }
 function saveApiKey() {
   const key = document.getElementById('apiKeyInput').value.trim();
-  if (!key.startsWith('sk-ant-')) { alert('Ongeldige sleutel — moet beginnen met sk-ant-'); return; }
+  if (!key.startsWith('sk-ant-')) { alert('Ongeldige sleutel, moet beginnen met sk-ant-'); return; }
   localStorage.setItem('tnl_api_key', key);
   document.getElementById('apiKeyOverlay').style.display = 'none';
   showAlert('Ok', '✅ API-sleutel opgeslagen. Probeer de screenshot opnieuw.', 3000);

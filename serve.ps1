@@ -9,7 +9,7 @@ catch { Write-Host "Kon poort $port niet openen: $_" -ForegroundColor Red; Read-
 Write-Host "Prospectie-app draait op http://localhost:$port/  (sluit dit venster om te stoppen)" -ForegroundColor Green
 Start-Process "http://localhost:$port/"
 
-$mime = @{ ".html"="text/html; charset=utf-8"; ".js"="text/javascript"; ".mjs"="text/javascript"; ".css"="text/css"; ".svg"="image/svg+xml"; ".json"="application/json"; ".png"="image/png"; ".woff"="font/woff"; ".woff2"="font/woff2"; ".ttf"="font/ttf" }
+$mime = @{ ".html"="text/html; charset=utf-8"; ".js"="text/javascript"; ".mjs"="text/javascript"; ".css"="text/css"; ".svg"="image/svg+xml"; ".json"="application/json"; ".png"="image/png"; ".jpg"="image/jpeg"; ".jpeg"="image/jpeg"; ".webp"="image/webp"; ".ico"="image/x-icon"; ".woff"="font/woff"; ".woff2"="font/woff2"; ".ttf"="font/ttf" }
 
 while ($listener.IsListening) {
   try {
