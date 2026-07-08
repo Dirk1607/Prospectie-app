@@ -195,7 +195,7 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
 <header>
   <div class="logo-badge"><img src="LogoNextLevel_FINAAL.jpg" alt="The Next Level"></div>
   <div>
-    <h1>Prospectie App <span class="ver">v1.2</span></h1>
+    <h1>Prospectie App <span class="ver">v1.4</span></h1>
   </div>
   <div class="header-right">
     <button class="apikey-btn" onclick="showApiKeyModal()" title="API-sleutel instellen">🔑 API-sleutel</button>
@@ -456,9 +456,13 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
 
 <script>
 // ===== SUPABASE =====
+// FASE 4 (unificatie): de Prospectie-app draait nu op het GEDEELDE offerte-project.
+// `prospects` is daar een compat-view bovenop bedrijf+contact (migratie 0024),
+// dus nieuwe prospecten komen meteen in de gedeelde database. Het oude project
+// (pylfvfcieyrwegcvlwwa) blijft bevroren als terugval.
 const sb = window.supabase.createClient(
-  'https://pylfvfcieyrwegcvlwwa.supabase.co',
-  'sb_publishable_jINc1spJu3sUcltJSABpLQ_r_jBNBud'
+  'https://sphmxlfpzzowsekzjltd.supabase.co',
+  'sb_publishable_5-6NPQpNMh3pIhmDysO2Ug_6URRIwCc'
 );
 
 const QUICKSCAN_URL = "https://quickscan.thenextlevel.consulting";
@@ -726,6 +730,20 @@ async function addManualContact() {
   if (!row.voornaam && !row.naam && !row.email) {
     showAlert('Err', '❌ Vul minstens voornaam, naam en e-mail in.');
     return;
+  }
+  // Slimme check: lijkt de bedrijfsnaam op een bestaand bedrijf (typfout/&-en/spatie)?
+  if (row.bedrijf) {
+    try {
+      const { data: matches } = await sb.rpc('zoek_gelijkaardige_bedrijven', { p_naam: row.bedrijf, p_drempel: 0.4 });
+      const exact = (matches || []).find(m => m.gelijkenis >= 0.999);
+      if (!exact && matches && matches.length) {
+        const top = matches[0];
+        const extra = matches.length > 1 ? ('\n(ook: ' + matches.slice(1).map(m => m.naam).join(', ') + ')') : '';
+        const koppel = confirm('"' + row.bedrijf + '" lijkt op bestaand bedrijf "' + top.naam + '" (' + Math.round(top.gelijkenis * 100) + '%).' + extra +
+          '\n\nOK = koppel aan het bestaande "' + top.naam + '".\nAnnuleren = toch als NIEUW bedrijf toevoegen.');
+        if (koppel) row.bedrijf = top.naam;   // exacte bestaande naam → trigger hangt eronder
+      }
+    } catch (e) { /* check niet-blokkerend */ }
   }
   // hergebruikt de gedeelde verwerking: dedup van dubbele e-mails, validatie en opslaan in Supabase
   await processProspectRows([row], 'handmatige invoer');
