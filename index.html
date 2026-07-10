@@ -209,7 +209,7 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--orange); c
 <header>
   <div class="logo-badge"><img src="LogoNextLevel_FINAAL.jpg" alt="The Next Level"></div>
   <div>
-    <h1>Prospectie App <span class="ver">v1.5</span></h1>
+    <h1>Prospectie App <span class="ver">v1.6</span></h1>
   </div>
   <div class="header-right">
     <button id="logout-btn" onclick="doeAfmelden()" title="Afmelden" style="display:none; background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.32); padding:7px 14px; border-radius:7px; cursor:pointer; font-size:13px;">Afmelden</button>
@@ -1363,13 +1363,13 @@ async function resetTemplate() {
 // Load initial settings view
 switchSettingsTab('KoudContact', document.querySelector('.settings-nav-item'));
 
-// Laad prospects en templates vanuit Supabase — pas NA login (zie login-gate onderaan)
+// Laad prospects en templates vanuit Supabase, pas NA login (zie login-gate onderaan)
 async function bootProspectie() {
   await loadProspectsFromSupabase();
   await loadTemplatesFromSupabase();
 }
 
-// ===== LOGIN-GATE — app start pas na aanmelden (rol 'authenticated') =====
+// ===== LOGIN-GATE, app start pas na aanmelden (rol 'authenticated') =====
 async function doeAfmelden() { await sb.auth.signOut(); location.reload(); }
 (async () => {
   const overlay  = document.getElementById('login-overlay');
@@ -1394,7 +1394,7 @@ async function doeAfmelden() { await sb.auth.signOut(); location.reload(); }
       if (error) throw error;
       await start();
     } catch (err) {
-      errEl.textContent = 'Aanmelden mislukt — controleer e-mail/wachtwoord.';
+      errEl.textContent = 'Aanmelden mislukt, controleer e-mail/wachtwoord.';
       console.error(err);
     } finally {
       btn.disabled = false; btn.textContent = 'Aanmelden';
